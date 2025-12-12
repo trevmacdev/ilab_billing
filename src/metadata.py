@@ -47,6 +47,10 @@ def get_employees(cust: str):
     # example data: "Luthando Adams, Another Employee"
     return config.get(f'customer.{cust}', 'employees')
 
+# extract employee rates from config - same order as employees
+def get_rates(cust:str):
+    return config.get(f'customer.{cust}', 'rates')
+
 # extract job code from confg
 def get_jobcode(cust: str):
     # example data: "Consumer" - Matches the jobcode_3 field in timesheet.csv
