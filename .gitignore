@@ -1,0 +1,10 @@
+.vscode/
+.src/__pycache__
+.src/scratch/
+.src/.gradio/
+
+confgi.properties
+sandbox.py
+timesheet.ipynb
+quick_test.py
+leave_liability.ipynb
