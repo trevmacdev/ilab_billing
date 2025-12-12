@@ -97,6 +97,11 @@ def get_pub_hol():
 def get_weekend(cust):
     return config.get(f'customer.{cust}', 'weekend')
 
+def get_billing_path(cust):
+    # append a folder for the current month and year to the billing file folder.
+    full_path = config.get(f'customer.{cust}', 'file_path') / str(date.today().month) + str(date.today().year)
+    return full_path
+
 def get_gradio_config():
     server_name = config.get('gradio', 'server_name')
     server_port = config.getint('gradio', 'server_port')
