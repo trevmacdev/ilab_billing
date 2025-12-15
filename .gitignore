@@ -2,7 +2,7 @@
 src/__pycache__/
 src/scratch/
 src/.gradio/
-
+src/tsheets/
 config.properties
 sandbox.py
 timesheet.ipynb

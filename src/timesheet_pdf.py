@@ -21,7 +21,7 @@ def build_cust_pdf(cust: str, df: pd.DataFrame):
     # --- Paths ---
     SCRIPT_DIR = Path(__file__).resolve().parent
     CONFIG_PATH = SCRIPT_DIR / "config.properties"
-    PDF_FN = f"scratch/{cust}_timesheet.pdf"
+    PDF_FN = f"tsheets/{cust}_timesheet.pdf"
     PDF_PATH = SCRIPT_DIR / PDF_FN
 
     # Ensure output folder exists
