@@ -1,3 +1,12 @@
+
+#########
+# TODO:
+# Add buttons to cycle through the timesheet preview in raw_view
+# Display each timesheet in tsheet_df[] when cycle buttons are clicked.
+# Remove the Preview (first five rows only) and replace with the customer name on tsheet_btn.
+##########
+
+
 import io
 import gradio as gr
 import pandas as pd
@@ -50,7 +59,7 @@ def tsheets_btn(ts, custs): # Pass in raw_tsheet and customers state variables.
     pdf_by_cust = {cust: build_cust_pdf(cust, df_by_cust[cust]) for cust in custs}
 
 
-    return  df_by_cust # tsheet_df, tsheet_files
+    return  df_by_cust, gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)  # tsheet_df, chkbx_cust, btn_tsheets, btn_download
 
 # End Functions
 ##########################################################
@@ -109,13 +118,24 @@ with gr.Blocks(title='Billing App') as billing_app:
                   value='Create Timesheet',
                   visible=False
               )
-              
-            # Right column: dataframe view scaled 1: 4
-            with gr.Column(scale=4):  
+
+              btn_download = gr.Button(
+                  value='Download Timesheet PDF',
+                  visible=False
+              )
+
+            # Right column: dataframes in tabs
+            with gr.Column(scale=4):
                 view_raw=gr.DataFrame(
                     label='Preview (first five rows only). Please review.',
                     wrap=True,
-                    )
+
+                )
+                 
+
+                
+
+            
 
 # End GUI
 ##########################################################
@@ -125,33 +145,33 @@ with gr.Blocks(title='Billing App') as billing_app:
 ##########################################################
 # Event Handlers
 
-            # 1. Create event handler for raw_csv
-            raw_csv.change(
-                fn=upload_tsheet,
-                inputs=raw_csv,
-                outputs=[raw_tsheet, view_raw, btn_submit]
-            )
+    # 1. Create event handler for raw_csv
+    raw_csv.change(
+        fn=upload_tsheet,
+        inputs=raw_csv,
+        outputs=[raw_tsheet, view_raw, btn_submit]
+    )
 
-            # 3. Submit raw timesheet for processing
-            btn_submit.click(
-                fn=submit_btn,
-                inputs=raw_tsheet,
-                outputs=[raw_tsheet, view_raw, btn_submit, chkbx_cust, btn_tsheets]
-            )
+    # 3. Submit raw timesheet for processing
+    btn_submit.click(
+        fn=submit_btn,
+        inputs=raw_tsheet,
+        outputs=[raw_tsheet, view_raw, btn_submit, chkbx_cust, btn_tsheets]
+    )
 
-            # 4. Select customers for billing
-            chkbx_cust.change(
-                fn=print_values, 
-                inputs=chkbx_cust,
-                outputs=customers # Update the customers state variable.
-            ) # seems to pass a 'selected' param to fn on the backend with the checked values
+    # 4. Select customers for billing
+    chkbx_cust.change(
+        fn=print_values, 
+        inputs=chkbx_cust,
+        outputs=customers # Update the customers state variable.
+    ) # seems to pass a 'selected' param to fn on the backend with the checked values
 
-            # 5. Create Timesheets per customer.
-            btn_tsheets.click(
-                fn=tsheets_btn,
-                inputs=[raw_tsheet, customers],
-                outputs=tsheet_df
-            )
+    # 5. Create Timesheets per customer.
+    btn_tsheets.click(
+        fn=tsheets_btn,
+        inputs=[raw_tsheet, customers],
+        outputs=[tsheet_df, chkbx_cust, btn_tsheets, btn_download]
+    )
 
 # End Event Handlers
 ##########################################################
