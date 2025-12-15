@@ -31,9 +31,26 @@ def submit_btn(ts):
     # Clean up raw_tsheet
     ts = clean_raw(raw_ts=ts)
 
+    return ts, ts.head(5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=True) # raw_tsheet, view_raw, btn_submit, chkbx_cust, btn_tsheets
 
-    
-    return ts, ts.head(5), gr.update(visible=False), gr.update(visible=True) # raw_tsheet, view_raw, btn_submit, chkbx_cust
+# 4. Save selected customer list to state.
+def print_values(selected):
+    # Update the customers state param with selected customer values
+    return selected
+
+# 5. Create timesheet for each customer in customer's state variable.
+def tsheets_btn(ts, custs): # Pass in raw_tsheet and customers state variables.
+    from extract_tsheet import build_cust_df
+    from timesheet_pdf import build_cust_pdf
+
+    # Create timesheet dataframes for customers.
+    df_by_cust = {cust: build_cust_df(cust, ts) for cust in custs}
+
+    # Create timesheet pdfs for customers
+    pdf_by_cust = {cust: build_cust_pdf(cust, df_by_cust[cust]) for cust in custs}
+
+
+    return  df_by_cust # tsheet_df, tsheet_files
 
 # End Functions
 ##########################################################
@@ -51,7 +68,17 @@ with gr.Blocks(title='Billing App') as billing_app:
     ########## 
     # SET STATE VARIABLES
     ##########
-    raw_tsheet = gr.State(pd.DataFrame())
+
+    customers = gr.State([])    # The list of customers to create individual timesheets and billing files for.
+
+    raw_tsheet = gr.State(pd.DataFrame())   # The master timesheet created from the uploaded csv.
+    tsheet_df = gr.State([]) # list of dataframes containing each tsheet.
+
+    tsheet_files = gr.State([]) # list of downloadable files for each customer's tsheet.
+
+    ########## 
+    # END STATE VARIABLES
+    ##########
 
     # 1. Create a dataframe by uploading timesheet.csv
     with gr.Group(visible=True) as row_group:
@@ -67,8 +94,7 @@ with gr.Blocks(title='Billing App') as billing_app:
                   value='Process',
                   visible=False
                   )
-              
-              
+                            
               chkbx_cust = gr.CheckboxGroup(
                   choices=get_customers(),
                   label='Customers',
@@ -78,6 +104,11 @@ with gr.Blocks(title='Billing App') as billing_app:
                   visible=False,
                   container=True,                  
               )
+
+              btn_tsheets = gr.Button(
+                  value='Create Timesheet',
+                  visible=False
+              )
               
             # Right column: dataframe view scaled 1: 4
             with gr.Column(scale=4):  
@@ -85,6 +116,14 @@ with gr.Blocks(title='Billing App') as billing_app:
                     label='Preview (first five rows only). Please review.',
                     wrap=True,
                     )
+
+# End GUI
+##########################################################
+
+#---------------------------#
+
+##########################################################
+# Event Handlers
 
             # 1. Create event handler for raw_csv
             raw_csv.change(
@@ -97,17 +136,27 @@ with gr.Blocks(title='Billing App') as billing_app:
             btn_submit.click(
                 fn=submit_btn,
                 inputs=raw_tsheet,
-                outputs=[raw_tsheet, view_raw, btn_submit, chkbx_cust]
+                outputs=[raw_tsheet, view_raw, btn_submit, chkbx_cust, btn_tsheets]
             )
 
-            # 2. 
+            # 4. Select customers for billing
+            chkbx_cust.change(
+                fn=print_values, 
+                inputs=chkbx_cust,
+                outputs=customers # Update the customers state variable.
+            ) # seems to pass a 'selected' param to fn on the backend with the checked values
 
+            # 5. Create Timesheets per customer.
+            btn_tsheets.click(
+                fn=tsheets_btn,
+                inputs=[raw_tsheet, customers],
+                outputs=tsheet_df
+            )
 
-
-
-
-# End GUI
+# End Event Handlers
 ##########################################################
+
+
 
 
 
