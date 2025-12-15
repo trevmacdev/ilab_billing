@@ -1,7 +1,7 @@
 import io
 import gradio as gr
 import pandas as pd
-from metadata import get_gradio_config
+from metadata import get_gradio_config, get_customers
 
 '''
 Algorythm:
@@ -18,20 +18,22 @@ Algorythm:
 ##########################################################
 # Functions
 
-# 1. Upload timesheet.csv file into memory
+# 2. Upload timesheet.csv file into memory
 def upload_tsheet(file_path):
 
     df = pd.read_csv(file_path)
     return df, df.head(5), gr.update(visible=True) # raw_tsheet, view_raw and btn_submit
 
-# 1. Submit timesheet for processing
-def create_cust_tsheets(ts):
+# 3. Submit timesheet for processing
+def submit_btn(ts):
     from extract_tsheet import clean_raw
     
     # Clean up raw_tsheet
     ts = clean_raw(raw_ts=ts)
+
+
     
-    return ts, ts.head(5) # raw_tsheet, view_raw
+    return ts, ts.head(5), gr.update(visible=False), gr.update(visible=True) # raw_tsheet, view_raw, btn_submit, chkbx_cust
 
 # End Functions
 ##########################################################
@@ -46,13 +48,15 @@ with gr.Blocks(title='Billing App') as billing_app:
     gr.Markdown('Export a timesheet in .csv format, from the Project Reports in TSheets.')
     gr.Markdown("Don't worry about filtering names, just make sure your start and end dates are correct.")
 
-    # Set state variables
+    ########## 
+    # SET STATE VARIABLES
+    ##########
     raw_tsheet = gr.State(pd.DataFrame())
 
     # 1. Create a dataframe by uploading timesheet.csv
     with gr.Group(visible=True) as row_group:
         with gr.Row():
-            # Left column: file upload + process button
+            # Left column: file upload, process button and Customer checkboxes.
             with gr.Column(scale=1, min_width=220):
               raw_csv=gr.File(
                   file_types=['.csv'], type='filepath', 
@@ -63,12 +67,23 @@ with gr.Blocks(title='Billing App') as billing_app:
                   value='Process',
                   visible=False
                   )
-
+              
+              
+              chkbx_cust = gr.CheckboxGroup(
+                  choices=get_customers(),
+                  label='Customers',
+                  info='Select customers for billing',
+                  type='value',
+                  interactive=True,
+                  visible=False,
+                  container=True,                  
+              )
+              
             # Right column: dataframe view scaled 1: 4
             with gr.Column(scale=4):  
                 view_raw=gr.DataFrame(
                     label='Preview (first five rows only). Please review.',
-                    wrap=True
+                    wrap=True,
                     )
 
             # 1. Create event handler for raw_csv
@@ -78,12 +93,14 @@ with gr.Blocks(title='Billing App') as billing_app:
                 outputs=[raw_tsheet, view_raw, btn_submit]
             )
 
-            # 1. Submit timesheet for processing
+            # 3. Submit raw timesheet for processing
             btn_submit.click(
-                fn=create_cust_tsheets,
+                fn=submit_btn,
                 inputs=raw_tsheet,
-                outputs=[raw_tsheet, view_raw]
+                outputs=[raw_tsheet, view_raw, btn_submit, chkbx_cust]
             )
+
+            # 2. 
 
 
 
