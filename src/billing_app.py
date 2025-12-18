@@ -77,6 +77,7 @@ def tsheets_btn(ts, custs): # Pass in raw_tsheet and customers state variables.
     pdf_by_cust = {cust: build_cust_pdf(cust, df_by_cust[cust]) for cust in custs}
 
     return(
+        custs[0],                   # curr_cust
         df_by_cust,                 # tsheet_df
         first_df,                   # view_output
         gr.update(visible=False),   # chkbx_cust
@@ -105,6 +106,8 @@ with gr.Blocks(title='Billing App') as billing_app:
     ##########
 
     customers = gr.State([])    # The list of customers to create individual timesheets and billing files for.
+
+    curr_cust = gr.State(str)   # hold the name of the currently viewed customer.
 
     raw_tsheet = gr.State(pd.DataFrame())   # The master timesheet created from the uploaded csv.
     tsheet_df = gr.State([]) # list of dataframes containing each tsheet.
@@ -213,6 +216,7 @@ with gr.Blocks(title='Billing App') as billing_app:
         fn=tsheets_btn,
         inputs=[raw_tsheet, customers],
         outputs=[
+            curr_cust,
             tsheet_df, 
             view_output, 
             chkbx_cust, 
