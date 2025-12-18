@@ -11,9 +11,8 @@ Algorythm:
 4. Allow the user to select customers for timesheet and billing file creation -> save to state
 5. Create timesheet per customer
     5.1 Allow user to select working customer.
-6. Allow user to set the default download path for each customer's billing files (extract from config.properties)
-7. Display timesheet per customer in tab with a download button -> pdf the timesheet and download the file.
-8. Create and display billing files in tabs with a download button -> xlsx the spreadsheet and downoad the billing file.
+6. Allow user to download a timesheet
+7. Create and display billing files in tabs with a download button -> xlsx the spreadsheet and downoad the billing file.
 '''
 
 ##########################################################
