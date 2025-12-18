@@ -31,7 +31,11 @@ Algorythm:
 def upload_tsheet(file_path):
 
     df = pd.read_csv(file_path)
-    return df, df.head(5), gr.update(visible=True) # raw_tsheet, view_output and btn_submit
+    return (
+        df,                     # raw_tsheet
+        df.head(5),             # view_output
+        gr.update(visible=True) # btn_submit
+        )
 
 # 3. Submit timesheet for processing
 def submit_btn(ts):
@@ -40,7 +44,13 @@ def submit_btn(ts):
     # Clean up raw_tsheet
     ts = clean_raw(raw_ts=ts)
 
-    return ts, ts.head(5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=True) # raw_tsheet, view_output, btn_submit, chkbx_cust, btn_tsheets
+    return (
+        ts,                         # raw_tsheet
+        ts.head(5),                 # view_output
+        gr.update(visible=False),   # btn_submit
+        gr.update(visible=True),    # chkbx_cust
+        gr.update(visible=True)     # btn_tsheets
+        )
 
 # 4. Save selected customer list to state.
 def print_values(selected):
@@ -49,17 +59,33 @@ def print_values(selected):
 
 # 5. Create timesheet for each customer in customer's state variable.
 def tsheets_btn(ts, custs): # Pass in raw_tsheet and customers state variables.
+    # Don't bother if there are no customers selected.
+    if not custs:
+        return
+    
+    # Import dependencies to build timesheet dataframes and pdfs.
     from extract_tsheet import build_cust_df
     from timesheet_pdf import build_cust_pdf
 
     # Create timesheet dataframes for customers.
     df_by_cust = {cust: build_cust_df(cust, ts) for cust in custs}
+    first_df = df_by_cust[custs[0]]
+
+    # Duplicate the first dataframe in df_by_cust to pass to view_outputs
 
     # Create timesheet pdfs for customers
     pdf_by_cust = {cust: build_cust_pdf(cust, df_by_cust[cust]) for cust in custs}
 
+    return(
+        df_by_cust,                 # tsheet_df
+        first_df,                   # view_output
+        gr.update(visible=False),   # chkbx_cust
+        gr.update(visible=False),   # btn_tsheets
+        gr.update(visible=True),    # btn_download
+        gr.Row.update(visible=True) # nav_buttons
+        )  
 
-    return  df_by_cust, gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.Row.update(visible=True)  # tsheet_df, chkbx_cust, btn_tsheets, btn_download, nav_buttons
+# tsheet_df, view_output, chkbx_cust, btn_tsheets, btn_download, nav_buttons
 
 # End Functions
 ##########################################################
@@ -137,7 +163,7 @@ with gr.Blocks(title='Billing App') as billing_app:
             # Right column: dataframes in tabs
             with gr.Column(scale=4):
                 view_output=gr.DataFrame(
-                    label='Preview (first five rows only). Please review.',
+                    label='Preview',
                     wrap=True,
 
                 )
@@ -166,7 +192,13 @@ with gr.Blocks(title='Billing App') as billing_app:
     btn_submit.click(
         fn=submit_btn,
         inputs=raw_tsheet,
-        outputs=[raw_tsheet, view_output, btn_submit, chkbx_cust, btn_tsheets]
+        outputs=[
+            raw_tsheet, 
+            view_output, 
+            btn_submit, 
+            chkbx_cust, 
+            btn_tsheets
+            ]
     )
 
     # 4. Select customers for billing
@@ -180,7 +212,14 @@ with gr.Blocks(title='Billing App') as billing_app:
     btn_tsheets.click(
         fn=tsheets_btn,
         inputs=[raw_tsheet, customers],
-        outputs=[tsheet_df, chkbx_cust, btn_tsheets, btn_download, nav_buttons]
+        outputs=[
+            tsheet_df, 
+            view_output, 
+            chkbx_cust, 
+            btn_tsheets, 
+            btn_download, 
+            nav_buttons
+            ]
     )
 
 # End Event Handlers
