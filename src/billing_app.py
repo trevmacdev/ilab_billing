@@ -59,7 +59,7 @@ def tsheets_btn(ts, custs): # Pass in raw_tsheet and customers state variables.
     pdf_by_cust = {cust: build_cust_pdf(cust, df_by_cust[cust]) for cust in custs}
 
 
-    return  df_by_cust, gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)  # tsheet_df, chkbx_cust, btn_tsheets, btn_download
+    return  df_by_cust, gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), gr.Row.update(visible=True)  # tsheet_df, chkbx_cust, btn_tsheets, btn_download, nav_buttons
 
 # End Functions
 ##########################################################
@@ -120,15 +120,13 @@ with gr.Blocks(title='Billing App') as billing_app:
               )
 
               # Add back and next buttons to cycle through   
-              with gr.Row():
+              with gr.Row(visible=False) as nav_buttons:
                   btn_back = gr.Button(
-                      value='Back',
-                      visible=False
+                      value='Back'
                   )
 
                   btn_next = gr.Button(
-                      value='Next',
-                      visible=False
+                      value='Next'
                   )
 
               btn_download = gr.Button(
@@ -182,7 +180,7 @@ with gr.Blocks(title='Billing App') as billing_app:
     btn_tsheets.click(
         fn=tsheets_btn,
         inputs=[raw_tsheet, customers],
-        outputs=[tsheet_df, chkbx_cust, btn_tsheets, btn_download]
+        outputs=[tsheet_df, chkbx_cust, btn_tsheets, btn_download, nav_buttons]
     )
 
 # End Event Handlers
