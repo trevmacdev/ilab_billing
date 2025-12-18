@@ -3,7 +3,7 @@
 # TODO:
 # Add buttons to cycle through the timesheet preview in raw_view
 # Display each timesheet in tsheet_df[] when cycle buttons are clicked.
-# Remove the Preview (first five rows only) and replace with the customer name on tsheet_btn.
+# Remove the Preview (first five rows only) and replace with the customer name on tsheets_btn.
 ##########
 
 
@@ -31,7 +31,7 @@ Algorythm:
 def upload_tsheet(file_path):
 
     df = pd.read_csv(file_path)
-    return df, df.head(5), gr.update(visible=True) # raw_tsheet, view_raw and btn_submit
+    return df, df.head(5), gr.update(visible=True) # raw_tsheet, view_output and btn_submit
 
 # 3. Submit timesheet for processing
 def submit_btn(ts):
@@ -40,7 +40,7 @@ def submit_btn(ts):
     # Clean up raw_tsheet
     ts = clean_raw(raw_ts=ts)
 
-    return ts, ts.head(5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=True) # raw_tsheet, view_raw, btn_submit, chkbx_cust, btn_tsheets
+    return ts, ts.head(5), gr.update(visible=False), gr.update(visible=True), gr.update(visible=True) # raw_tsheet, view_output, btn_submit, chkbx_cust, btn_tsheets
 
 # 4. Save selected customer list to state.
 def print_values(selected):
@@ -119,6 +119,18 @@ with gr.Blocks(title='Billing App') as billing_app:
                   visible=False
               )
 
+              # Add back and next buttons to cycle through   
+              with gr.Row():
+                  btn_back = gr.Button(
+                      value='Back',
+                      visible=False
+                  )
+
+                  btn_next = gr.Button(
+                      value='Next',
+                      visible=False
+                  )
+
               btn_download = gr.Button(
                   value='Download Timesheet PDF',
                   visible=False
@@ -126,7 +138,7 @@ with gr.Blocks(title='Billing App') as billing_app:
 
             # Right column: dataframes in tabs
             with gr.Column(scale=4):
-                view_raw=gr.DataFrame(
+                view_output=gr.DataFrame(
                     label='Preview (first five rows only). Please review.',
                     wrap=True,
 
@@ -149,14 +161,14 @@ with gr.Blocks(title='Billing App') as billing_app:
     raw_csv.change(
         fn=upload_tsheet,
         inputs=raw_csv,
-        outputs=[raw_tsheet, view_raw, btn_submit]
+        outputs=[raw_tsheet, view_output, btn_submit]
     )
 
     # 3. Submit raw timesheet for processing
     btn_submit.click(
         fn=submit_btn,
         inputs=raw_tsheet,
-        outputs=[raw_tsheet, view_raw, btn_submit, chkbx_cust, btn_tsheets]
+        outputs=[raw_tsheet, view_output, btn_submit, chkbx_cust, btn_tsheets]
     )
 
     # 4. Select customers for billing
