@@ -1,13 +1,4 @@
 
-#########
-# TODO:
-# Add buttons to cycle through the timesheet preview in raw_view
-# Display each timesheet in tsheet_df[] when cycle buttons are clicked.
-# Remove the Preview (first five rows only) and replace with the customer name on tsheets_btn.
-##########
-
-
-import io
 import gradio as gr
 import pandas as pd
 from metadata import get_gradio_config, get_customers
