@@ -18,10 +18,20 @@ from PyPDF2 import PdfReader, PdfWriter
 
 
 def build_cust_pdf(cust: str, df: pd.DataFrame):
+    
+    # --- Get timesheet dates to append to filename. 
+    # Convert to datetime (keeps it simple; adjust format if needed)
+    dates = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
+
+    first_date = dates.min().strftime('%Y-%m-%d')
+    last_date  = dates.max().strftime('%Y-%m-%d')
+    date_range = f"{first_date}_to_{last_date}"
+
+    
     # --- Paths ---
     SCRIPT_DIR = Path(__file__).resolve().parent
     CONFIG_PATH = SCRIPT_DIR / "config.properties"
-    PDF_FN = f"tsheets/{cust}_timesheet.pdf"
+    PDF_FN = f"tsheets/{cust}_timesheet_{date_range}.pdf"
     PDF_PATH = SCRIPT_DIR / PDF_FN
 
     # Ensure output folder exists
@@ -30,6 +40,8 @@ def build_cust_pdf(cust: str, df: pd.DataFrame):
     # --- Load configuration (use str path) ---
     config = cp.ConfigParser()
     config.read(os.fspath(CONFIG_PATH))
+
+
 
     # ----------------------------
     # Build table Flowables (no build here)
