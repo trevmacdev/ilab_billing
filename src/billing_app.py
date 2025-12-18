@@ -68,14 +68,18 @@ def tsheets_btn(ts, custs): # Pass in raw_tsheet and customers state variables.
     # Create timesheet pdfs for customers
     pdf_by_cust = {cust: build_cust_pdf(cust, df_by_cust[cust]) for cust in custs}
 
+    # Update Label above output view.
+    label = gr.Markdown(f'### Timesheet: {custs[0]}')
+
     return(
-        custs[0],                   # curr_cust
-        df_by_cust,                 # tsheet_df
-        first_df,                   # view_output
-        gr.update(visible=False),   # chkbx_cust
-        gr.update(visible=False),   # btn_tsheets
-        gr.update(visible=True),    # btn_download
-        gr.Row.update(visible=True) # nav_buttons
+        custs[0],                       # curr_cust
+        df_by_cust,                     # tsheet_df
+        first_df,                       # view_output
+        gr.update(visible=False),       # chkbx_cust
+        gr.update(visible=False),       # btn_tsheets
+        gr.update(visible=True),        # btn_download
+        gr.Row.update(visible=True),    # nav_buttons
+        label                           # view_output_label
         )  
 
 def back_btn(
@@ -106,9 +110,13 @@ def back_btn(
     # retieve dataframe for previous customer.
     df = ts[cust]
 
+    # Update Label above output view.
+    label = gr.Markdown(f'### Timesheet: {cust}')
+
     return(
         cust,   # curr_cust,
-        df      # view_output
+        df,     # view_output
+        label   # view_output_label
     )
 
 def next_btn(
@@ -139,9 +147,13 @@ def next_btn(
     # retieve dataframe for previous customer.
     df = ts[cust]
 
+    # Update Label above output view.
+    label = gr.Markdown(f'### Timesheet: {cust}')
+
     return(
         cust,   # curr_cust,
-        df      # view_output
+        df,     # view_output
+        label   # view_output_label
     )
 
 # End Functions
@@ -221,8 +233,8 @@ with gr.Blocks(title='Billing App') as billing_app:
 
             # Right column: dataframes in tabs
             with gr.Column(scale=4):
+                view_output_label = gr.Markdown(f'### Timesheet: Raw')
                 view_output=gr.DataFrame(
-                    label='Preview',
                     wrap=True,
 
                 )
@@ -273,7 +285,8 @@ with gr.Blocks(title='Billing App') as billing_app:
             chkbx_cust, 
             btn_tsheets, 
             btn_download, 
-            nav_buttons
+            nav_buttons,
+            view_output_label
         ]
     )
 
@@ -286,7 +299,8 @@ with gr.Blocks(title='Billing App') as billing_app:
         ],
         outputs=[
             curr_cust,
-            view_output
+            view_output,
+            view_output_label
         ]
     )
 
@@ -298,7 +312,8 @@ with gr.Blocks(title='Billing App') as billing_app:
         ],
         outputs=[
             curr_cust,
-            view_output
+            view_output,
+            view_output_label
         ]
     )
 
