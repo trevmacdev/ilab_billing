@@ -383,7 +383,9 @@ def build_cust_pdf(cust: str, df: pd.DataFrame):
             landscape_mode=False,
             margins_mm=8.0,
         )
-
+    
+    # Pass the filename path back to the web app to store in state.
+    return str(Path(PDF_PATH).resolve())
 
 # Example usage (replace df with your actual DataFrame)
 if __name__ == "__main__":
