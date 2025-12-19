@@ -1,8 +1,15 @@
+####
+# TODO
+# Create billing file template
+# Add rate information to config file
+# Build billing file to excel
+####
+
 
 import os
 import gradio as gr
 import pandas as pd
-from metadata import get_gradio_config, get_customers, get_billing_path
+from metadata import get_gradio_config, get_customers
 
 '''
 Algorythm:
