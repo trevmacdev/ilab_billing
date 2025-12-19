@@ -1,7 +1,8 @@
 
+import os
 import gradio as gr
 import pandas as pd
-from metadata import get_gradio_config, get_customers
+from metadata import get_gradio_config, get_customers, get_billing_path
 
 '''
 Algorythm:
@@ -65,7 +66,7 @@ def tsheets_btn(ts, custs): # Pass in raw_tsheet and customers state variables.
     # Duplicate the first dataframe in df_by_cust to pass to view_outputs
 
     # Create timesheet pdfs for customers
-    pdf_by_cust = {cust: build_cust_pdf(cust, df_by_cust[cust]) for cust in custs}
+    pdf_by_cust = {cust: build_cust_pdf(cust,df_by_cust[cust]) for cust in custs}
 
     # Update Label above output view.
     label = gr.Markdown(f'### Timesheet: {custs[0]}')
@@ -73,6 +74,7 @@ def tsheets_btn(ts, custs): # Pass in raw_tsheet and customers state variables.
     return(
         custs[0],                       # curr_cust
         df_by_cust,                     # tsheet_df
+        pdf_by_cust,                    # dl_buff_ts
         first_df,                       # view_output
         gr.update(visible=False),       # chkbx_cust
         gr.update(visible=False),       # btn_tsheets
@@ -115,7 +117,7 @@ def back_btn(
     return(
         cust,   # curr_cust,
         df,     # view_output
-        label   # view_output_label
+        label,  # view_output_label
     )
 
 def next_btn(
@@ -151,8 +153,26 @@ def next_btn(
 
     return(
         cust,   # curr_cust,
-        df,     # view_output
-        label   # view_output_label
+        df,     # view_output,
+        label,  # view_output_label
+    )
+
+def download_ts_btn(ts_paths, cust):
+    # Timesheet pdfs are temporarilly saved on the server for download.
+    # ts_paths is a dict with the full path and filename, for each customers timesheets.
+
+    # Get the path for the current customer's timesheet.
+    source_path = ts_paths[cust]
+    print(source_path)
+
+    # The download path is set by default in config.properties.
+    # dest_path = get_billing_path(cust)
+    # not possible due to technical reasons.
+
+    # File is downloaded by providing the source path to file_output.
+
+    return (
+        source_path     # file_output
     )
 
 # End Functions
@@ -180,6 +200,8 @@ with gr.Blocks(title='Billing App') as billing_app:
     tsheet_df = gr.State([]) # list of dataframes containing each tsheet.
 
     tsheet_files = gr.State([]) # list of downloadable files for each customer's tsheet.
+
+    dl_buff_ts = gr.State([]) # buffer of timesheet.pdf filenames for download.
 
     ########## 
     # END STATE VARIABLES
@@ -225,9 +247,13 @@ with gr.Blocks(title='Billing App') as billing_app:
                       value='Next'
                   )
 
-              btn_download = gr.Button(
+              btn_download_ts = gr.Button(
                   value='Download Timesheet PDF',
                   visible=False
+              )
+
+              file_output = gr.File(
+                  label='Download PDF'
               )
 
             # Right column: dataframes in tabs
@@ -279,11 +305,12 @@ with gr.Blocks(title='Billing App') as billing_app:
         inputs=[raw_tsheet, customers],
         outputs=[
             curr_cust,
-            tsheet_df, 
+            tsheet_df,
+            dl_buff_ts, 
             view_output, 
             chkbx_cust, 
             btn_tsheets, 
-            btn_download, 
+            btn_download_ts, 
             nav_buttons,
             view_output_label
         ]
@@ -299,7 +326,7 @@ with gr.Blocks(title='Billing App') as billing_app:
         outputs=[
             curr_cust,
             view_output,
-            view_output_label
+            view_output_label,
         ]
     )
 
@@ -312,7 +339,18 @@ with gr.Blocks(title='Billing App') as billing_app:
         outputs=[
             curr_cust,
             view_output,
-            view_output_label
+            view_output_label,
+        ]
+    )
+
+    btn_download_ts.click(
+        fn=download_ts_btn,
+        inputs=[
+            dl_buff_ts,
+            curr_cust,
+        ],
+        outputs=[
+            file_output,
         ]
     )
 
@@ -336,4 +374,5 @@ if __name__ == '__main__':
         show_error=gradio_config['show_error'],
         share=gradio_config['share'],
         show_api=gradio_config['show_api'],
+        allowed_paths=gradio_config['allowed_paths'],
     )
