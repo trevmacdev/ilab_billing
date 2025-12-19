@@ -78,7 +78,6 @@ def tsheets_btn(ts, custs): # Pass in raw_tsheet and customers state variables.
         first_df,                       # view_output
         gr.update(visible=False),       # chkbx_cust
         gr.update(visible=False),       # btn_tsheets
-        gr.update(visible=True),        # btn_download
         gr.Row.update(visible=True),    # nav_buttons
         label                           # view_output_label
         )  
@@ -157,23 +156,21 @@ def next_btn(
         label,  # view_output_label
     )
 
-def download_ts_btn(ts_paths, cust):
-    # Timesheet pdfs are temporarilly saved on the server for download.
-    # ts_paths is a dict with the full path and filename, for each customers timesheets.
+def output_view_chg(ts_paths, cust):
+    
+    # if no ts_paths exist then exit without doing anything
+    if len(ts_paths) == 0:
+        return
 
     # Get the path for the current customer's timesheet.
     source_path = ts_paths[cust]
     print(source_path)
 
-    # The download path is set by default in config.properties.
-    # dest_path = get_billing_path(cust)
-    # not possible due to technical reasons.
-
-    # File is downloaded by providing the source path to file_output.
-
     return (
         source_path     # file_output
     )
+
+
 
 # End Functions
 ##########################################################
@@ -247,11 +244,6 @@ with gr.Blocks(title='Billing App') as billing_app:
                       value='Next'
                   )
 
-              btn_download_ts = gr.Button(
-                  value='Download Timesheet PDF',
-                  visible=False
-              )
-
               file_output = gr.File(
                   label='Download PDF'
               )
@@ -276,7 +268,11 @@ with gr.Blocks(title='Billing App') as billing_app:
     raw_csv.change(
         fn=upload_tsheet,
         inputs=raw_csv,
-        outputs=[raw_tsheet, view_output, btn_submit]
+        outputs=[
+            raw_tsheet, 
+            view_output, 
+            btn_submit
+            ]
     )
 
     # 3. Submit raw timesheet for processing
@@ -310,7 +306,6 @@ with gr.Blocks(title='Billing App') as billing_app:
             view_output, 
             chkbx_cust, 
             btn_tsheets, 
-            btn_download_ts, 
             nav_buttons,
             view_output_label
         ]
@@ -343,8 +338,8 @@ with gr.Blocks(title='Billing App') as billing_app:
         ]
     )
 
-    btn_download_ts.click(
-        fn=download_ts_btn,
+    view_output.change(
+        fn=output_view_chg,
         inputs=[
             dl_buff_ts,
             curr_cust,
