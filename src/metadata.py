@@ -108,12 +108,17 @@ def get_gradio_config():
     show_error = config.getboolean('gradio', 'show_error')
     share = config.getboolean('gradio', 'share')
     show_api = config.getboolean('gradio', 'show_api')
+    allowed_paths = [
+        SCRIPT_DIR / config.get('paths', 'pdf'),
+        SCRIPT_DIR / config.get('paths', 'xls')
+    ]
     grad = {
         'server_name': server_name,
         'server_port': server_port,
         'show_error': show_error,
         'share': share,
-        'show_api': show_api
+        'show_api': show_api,
+        'allowed_paths': allowed_paths
     }
     return grad
 
