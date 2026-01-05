@@ -1,7 +1,7 @@
 ####
 # TODO
 # Create billing file template
-# Add rate information to config file
+# Add rate information to config file - Done
 # Build billing file to excel
 ####
 
@@ -86,7 +86,8 @@ def tsheets_btn(ts, custs): # Pass in raw_tsheet and customers state variables.
         gr.update(visible=False),       # chkbx_cust
         gr.update(visible=False),       # btn_tsheets
         gr.Row.update(visible=True),    # nav_buttons
-        label                           # view_output_label
+        label,                          # view_output_label
+        gr.update(visible=True),        # btn_bfile
         )  
 
 def back_btn(
@@ -177,6 +178,15 @@ def output_view_chg(ts_paths, cust):
         source_path     # file_output
     )
 
+def bfile_btn(custs, ts):
+    from billing_file import process_billing
+
+    # Fetch a dictionary of customer names and corresponding file names.
+    bill_file = {cust: process_billing(cust, ts[cust]) for cust in custs}
+
+    return
+
+
 
 
 # End Functions
@@ -201,6 +211,7 @@ with gr.Blocks(title='Billing App') as billing_app:
     curr_cust = gr.State()   # hold the name of the currently viewed customer.
 
     raw_tsheet = gr.State(pd.DataFrame())   # The master timesheet created from the uploaded csv.
+
     tsheet_df = gr.State([]) # list of dataframes containing each tsheet.
 
     tsheet_files = gr.State([]) # list of downloadable files for each customer's tsheet.
@@ -253,6 +264,12 @@ with gr.Blocks(title='Billing App') as billing_app:
 
               file_output = gr.File(
                   label='Download PDF'
+              )
+            
+              # 6. Add billing file button
+              btn_bfile = gr.Button(
+                  value='Create Billing Files',
+                  visible=False
               )
 
             # Right column: dataframes in tabs
@@ -314,7 +331,8 @@ with gr.Blocks(title='Billing App') as billing_app:
             chkbx_cust, 
             btn_tsheets, 
             nav_buttons,
-            view_output_label
+            view_output_label,
+            btn_bfile,
         ]
     )
 
@@ -353,6 +371,15 @@ with gr.Blocks(title='Billing App') as billing_app:
         ],
         outputs=[
             file_output,
+        ]
+    )
+
+    # 6. Billing file prep
+    btn_bfile.click(
+        fn=bfile_btn,
+        inputs=[
+            customers,
+            tsheet_df
         ]
     )
 
