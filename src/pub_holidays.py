@@ -24,7 +24,7 @@ def pub_hol(year):
     years = [str(int(year) - 1), year, str(int(year) + 1)]
     holidays = []
     for y in years:
-        print(f"South Africa public holidays for {y} (source: Nager.Date):")
+        # print(f"South Africa public holidays for {y} (source: Nager.Date):")
         try:
             holidays = holidays + fetch_sa_public_holidays(y)
         except Exception as e:
@@ -40,13 +40,13 @@ def pub_hol(year):
         local_name = h.get("localName", "")
         english_name = h.get("name", "")
         types = ", ".join(h.get("types", [])) if isinstance(h.get("types"), list) else ""
-        print(f"- {date}: {local_name} / {english_name} [{types}]")
+        # print(f"- {date}: {local_name} / {english_name} [{types}]")
 
     
     # NEW: print a comma-separated list of date values only
     date_values = [h.get("date", "") for h in holidays]
-    print("\nComma-separated date values:")
-    print(",".join(date_values))
+    # print("\nComma-separated date values:")
+    # print(",".join(date_values))
     return(",".join(date_values))
 
 
