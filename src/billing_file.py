@@ -91,16 +91,6 @@ def rearrange_hours(cust: str, df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
-# -------------------------
-# Example usage (optional):
-# -------------------------
-
-# Create excel file
-def excel_file(cust, df):
-    # Retrieve metadata.
-    
-    return
-
 def create_billing_df(cust, df):
 
     # Prep dataframe
@@ -110,14 +100,10 @@ def create_billing_df(cust, df):
     # Calculate overtime hours
     df = rearrange_hours(cust, df)
 
-
-    
-
-
     print('Display final dataframe')
     print(df)
 
-    return
+    return df
 
 def create_billing_excel(cust, df):
     return
@@ -125,7 +111,7 @@ def create_billing_excel(cust, df):
 def process_billing(cust, df):
 
     # Create a billing file dataframe for cust
-    create_billing_df(cust, df)
+    df = create_billing_df(cust, df)
 
     return(
         # Dictionary of customer names and billing file paths.
