@@ -1,0 +1,73 @@
+from metadata import get_mysql_config
+import mysql.connector
+import json
+
+# Establish a db connection
+def get_db_connection():
+
+    details = get_mysql_config()
+
+    try:
+        cn = mysql.connector.connect(
+            host = details['host'],
+            user = details['user'],
+            password = details['password'],
+            database = details['database'],
+            port = details['port'],
+            autocommit = True
+        )
+        if cn.is_connected():
+            print('Connected to database')
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+    return cn
+
+####
+# START - INSERTING DATA
+####
+
+# The project table contains a list of projects per client and purchase order. Billing is generally caried out per purchase order
+def projects_insert(
+        po_num,
+        proj_client,
+        proj_name,
+        proj_manager,
+        job_code,
+        manager_sig,
+        employee_sig,
+        notes,
+        weekend,
+        ot_rate,
+        po_period
+):
+    cn = get_db_connection()
+
+    try:
+        cur = cn.cursor()
+        
+        # Call stored proc
+        cur.callproc('insert_project',[
+            po_num,
+            proj_client,
+            proj_name,
+            proj_manager,
+            job_code,
+            manager_sig,
+            employee_sig,
+            notes,
+            weekend,
+            ot_rate,
+            po_period
+            ]
+        )
+        
+    finally:
+        cur.close()
+        cn.close()
+
+
+####
+# END - INSERTING DATA
+####
