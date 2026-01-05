@@ -1,6 +1,7 @@
-from openpyxl import Workbook
+from openpyxl import Workbook, load_workbook
+from pathlib import Path
 from extract_tsheet import build_cust_df
-from metadata import get_pub_hol, get_weekend, get_rates, get_customers
+from metadata import get_pub_hol, get_weekend, get_rates, get_customers, get_company, get_po, get_po_period,        get_employees, get_ot, get_roles
 import numpy as np
 import pandas as pd
 
@@ -10,7 +11,7 @@ def overtime(cust, df):
     print(f'Public Holidays: {pub_hol}')
 
     # retrieve rates for custmer from config file
-    ot_rate = get_rates(cust)
+    ot_rate = get_ot(cust)
     print(f'OT Rates: {ot_rate}')
 
     # add normal overtime column to dataframe
@@ -106,14 +107,58 @@ def create_billing_df(cust, df):
     return df
 
 def create_billing_excel(cust, df):
-    return
+
+    # -- Get all metadata for billing file
+    company = get_company(cust)
+    po_num = get_po(cust)
+    po_period = get_po_period(cust)
+    resources = get_employees(cust)
+    rates = get_rates(cust)
+    ot_multiplier = get_ot(cust)
+    empl_roles = get_roles(cust)
+     
+    # --- Get timesheet dates to append to filename. 
+    # Convert to datetime (keeps it simple; adjust format if needed)
+    dates = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
+
+    first_date = dates.min().strftime('%Y-%m-%d')
+    last_date  = dates.max().strftime('%Y-%m-%d')
+    date_range = f"{first_date}_to_{last_date}"
+
+    # Set save path and filename
+    # --- Paths ---
+    SCRIPT_DIR = Path(__file__).resolve().parent
+    XLS_FN = f"billing_files/{company}-billing-{date_range}.xlsx"
+    XLS_PATH = SCRIPT_DIR / XLS_FN
+
+    try:
+        # Try open the workbook if it exists.
+        wb = load_workbook(XLS_PATH)
+        print(f'Opened existing excel file: {XLS_FN}')
+    except FileNotFoundError:
+        # If file doesn't exist, create a new one.
+        wb = Workbook()
+        print(f'Created new excel file: {XLS_FN}')
+
+    # Create Summary worksheet if it doesn't exist.
+    if 'Summary'not in wb.worksheets:
+        ws = wb['Summary']
+
+
+    wb.save(XLS_PATH)
+    return (
+        XLS_PATH,
+        XLS_FN
+    )
 
 def process_billing(cust, df):
 
     # Create a billing file dataframe for cust
     df = create_billing_df(cust, df)
 
+    pth, fn = create_billing_excel(cust, df)
+
     return(
-        # Dictionary of customer names and billing file paths.
+
     )
 

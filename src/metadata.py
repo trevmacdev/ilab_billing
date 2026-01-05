@@ -66,11 +66,15 @@ def get_employee_sig(cust: str):
     # example data: "True"
     return config.get(f'customer.{cust}', 'employee_sig')
 
+def get_roles(cust:str):
+    # get employee roles
+    return config.get(f'customer.{cust}', 'roles')
+
 def get_notes(cust: str):
     # example data: "True"
     return config.get(f'customer.{cust}', 'notes')
 
-def get_rates(cust: str):
+def get_ot(cust: str):
     # example data: '{"Mon": 1.5, "Tue": 1.5, "Wed": 1.5, "Thu": 1.5, "Fri": 1.5, "Sat": 1.5, "Sun": 2, "Pub": 2}' - Dictionary
     return json.loads(config[f'customer.{cust}'] ['ot_rate'])
                         
@@ -104,6 +108,12 @@ def get_billing_path(cust):
 
 def get_po(cust):
     return config.get(f'customer.{cust}', 'po_num')
+
+def get_po_period(cust):
+    return config.get(f'customer.{cust}', 'po_period')
+
+def get_company(cust):
+    return config.get(f'customer.{cust}', 'company')
 
 def get_gradio_config():
     server_name = config.get('gradio', 'server_name')
