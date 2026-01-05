@@ -102,6 +102,9 @@ def get_billing_path(cust):
     full_path = config.get(f'customer.{cust}', 'file_path') / str(date.today().month) + str(date.today().year)
     return full_path
 
+def get_po(cust):
+    return config.get(f'customer.{cust}', 'po_num')
+
 def get_gradio_config():
     server_name = config.get('gradio', 'server_name')
     server_port = config.getint('gradio', 'server_port')
