@@ -1,35 +1,27 @@
+from openpyxl import Workbook
 from extract_tsheet import build_cust_df
 from metadata import get_pub_hol, get_weekend, get_rates, get_customers
 import numpy as np
 import pandas as pd
 
+def overtime(cust, df):
 # retrieve public holidays from config file
-pub_hol = get_pub_hol()
-print(f'Public Holidays: {pub_hol}')
+    pub_hol = get_pub_hol()
+    print(f'Public Holidays: {pub_hol}')
 
-consumer = build_cust_df('consumer')
-openserve = build_cust_df('openserve')
-hyphen = build_cust_df('hyphen')
+    # retrieve rates for custmer from config file
+    ot_rate = get_rates(cust)
+    print(f'OT Rates: {ot_rate}')
 
-print(consumer)
+    # add normal overtime column to dataframe
+    df['Normal_OT'] = np.nan
+    df['High_OT'] = np.nan
 
-
-# retrieve rates for custmer from config file
-ot_rate = get_rates('consumer')
-print(f'OT Rates: {ot_rate}')
-
-# add normal overtime column to dataframe
-consumer['Normal_OT'] = np.nan
-consumer['High_OT'] = np.nan
-
-print(consumer.info())
+    print(df.info())
 
 
 
-def rearrange_hours(cust: str) -> pd.DataFrame:
-
-    #retrieve timesheet for customer
-    df = build_cust_df(cust)
+def rearrange_hours(cust: str, df: pd.DataFrame) -> pd.DataFrame:
 
     # Parse public holidays (Note: using the key name exactly as given: 'public_hollidays')
     holidays_raw = get_pub_hol()
@@ -103,7 +95,39 @@ def rearrange_hours(cust: str) -> pd.DataFrame:
 # Example usage (optional):
 # -------------------------
 
-customers = get_customers()
-for cust in customers:
-    consumer = rearrange_hours('consumer')
-    print(consumer)
+# Create excel file
+def excel_file(cust, df):
+    # Retrieve metadata.
+    
+    return
+
+def create_billing_df(cust, df):
+
+    # Prep dataframe
+    # Drop the Cust and Notes column, we don't need it here.
+    df = df.drop(columns=['Cust', 'Notes'])
+    
+    # Calculate overtime hours
+    df = rearrange_hours(cust, df)
+
+
+    
+
+
+    print('Display final dataframe')
+    print(df)
+
+    return
+
+def create_billing_excel(cust, df):
+    return
+
+def process_billing(cust, df):
+
+    # Create a billing file dataframe for cust
+    create_billing_df(cust, df)
+
+    return(
+        # Dictionary of customer names and billing file paths.
+    )
+
