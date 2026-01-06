@@ -100,6 +100,24 @@ def get_client_and_proj():
     
     return choices
 
+# Return project information
+def get_project_info(proj_client, proj_name):
+
+    cn = get_db_connection()
+
+    cr = cn.cursor(dictionary=True)
+    cr.callproc('sp_get_project_details', [proj_client, proj_name])
+
+    project_info = None
+    for result in cr.stored_results():
+        rows = result.fetchall()     # We only expect one record
+        if rows:
+            result_row = rows[0]
+        break
+
+
+    return result_row
+
 ####
 # END - SELECT STATEMENTS
 ####
