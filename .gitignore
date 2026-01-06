@@ -4,6 +4,7 @@ src/scratch/
 src/.gradio/
 src/tsheets/
 billing_app/__pycache__
+billing_app/scratch/
 config.properties
 sandbox.py
 timesheet.ipynb
