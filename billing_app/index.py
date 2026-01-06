@@ -48,6 +48,37 @@ def login_btn(usr, pwd):
         None                       # ROLE value
     )
 
+# 3. CRUD Projects
+
+# Create a project
+def create_proj_btn():
+    return
+
+# Read a project
+def proj_id_dd(key):
+    # Key returned in the format PROJ_CLIENT - PROJ_NAME
+    # Split the key into client and proj name
+
+    proj_client, proj_name = key.split(" - ", 1)
+
+    # Select * from projects where pk matches key
+
+    # Update the state veriables
+
+    # Make visible and populate the project information fields with select * results.
+
+    return(
+        proj_client,  # PROJ_CLIENT
+        proj_name,    # PROJ_NAME
+        gr.update(Visible=True)     # Project info panel
+    )
+
+# Delete a project
+def delete_proj_btn(proj_client, proj_name):
+    from db_helper import delete_project
+    delete_project(proj_client, proj_name)
+    return None, None # PROJ_CLIENT and PROJ_NAME
+
 ####
 # END -- EVENT HANDLER FUNCTIONS (FN=)
 ####
@@ -83,40 +114,63 @@ def build_login(parent, pnl_admin, pnl_user, ROLE):
         "msg": msg,
     }
 
-# 2. Administrator Tabs
-    # Tab creation handled at deisgn
-
-# 3. CRUD Projects
-
-# Create a project
-def create_proj_btn():
-    return
-
-
 # 2. Build administrator tabs
-def build_admin_tabs(parent):
-    from db_helper import get_client_and_proj
-    
-    # Get client and project into to populate proj_id
-    choices = get_client_and_proj()
+def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
+    from db_helper import(
+        get_client_and_proj,
+        # delete_project,
+    )
+
+    # Retrieve metadata
+
+    projects = get_client_and_proj()
+        
+    # Build the tab
     with parent:
         with gr.Tab("Manage Projects"):
             gr.Markdown("### Manage Projects (Admin)")
-            proj_id = gr.Dropdown(
+            dd_proj_id = gr.Dropdown(
                 label="Client - Project",
-                choices=choices,
+                choices=projects,
+                value=f'{PROJ_CLIENT} - {PROJ_NAME}',
                 filterable=True)
 
             with gr.Row():
                 btn_create_proj = gr.Button("New Project")
-                btn_read_proj = gr.Button("View Project")
+                # btn_read_proj = gr.Button("View Project")
                 btn_update_proj = gr.Button("Update Project")
                 btn_delete_proj = gr.Button("Delete Project")
 
-            btn_create_proj.click(
+
+            # 3. CRUD projects
+            btn_create_proj.click(      # create
                 fn=create_proj_btn,
-                inputs=[],
+                inputs=[
+                ],
+                outputs=[
+                    PROJ_CLIENT,
+                    PROJ_NAME,
+                ]
+            )
+
+            dd_proj_id.change(             # read
+                fn=proj_id_dd,
+                inputs=[
+                    dd_proj_id.value,
+                ],
                 outputs=[]
+            )
+
+            btn_delete_proj.click(      # delete
+                fn=delete_proj_btn,
+                inputs=[
+                    PROJ_CLIENT,
+                    PROJ_NAME,
+                ],
+                outputs=[
+                    PROJ_CLIENT,
+                    PROJ_NAME,
+                ]
             )
 
         with gr.Tab("Manage Employees"):
@@ -133,6 +187,32 @@ def build_admin_tabs(parent):
                 inputs=[emp_name, emp_role],
                 outputs=[emp_out],
             )
+            
+            with gr.Row("Project Info", visible=False) as pnl_view_proj_admin:
+                gr.Markdown('### Project Information')
+                with gr.Column():
+                    gr.Markdown('Project Info')
+                    tb_proj_client = gr.Textbox()
+                    tb_proj_name = gr.Textbox()
+                    tb_job_code = gr.Textbox()
+                    tb_ot_rate = gr.Textbox()
+                    tb_weekend = gr.Textbox()
+                with gr.Column():
+                    gr.Markdown('Personnel and PO details')
+                    tb_client_manager = gr.Textbox()
+                    tb_ilab_manager = gr.Textbox()
+                    tb_po_num = gr.Textbox()
+                    tb_po_period = gr.Textbox()
+                with gr.Column():
+                    gr.Markdown('Timesheet instructions')
+                    tb_manager_sig = gr.Textbox()
+                    tb_employee_sig = gr.Textbox()
+                    tb_notes = gr.Textbox()
+
+
+
+
+
     return
 
 # 3. Build user tabs
@@ -181,6 +261,9 @@ def build_app():
         # STATE VARIABLES
         ROLE = gr.State(value=None)  # 1. Log into application - can be admin or user
 
+        PROJ_CLIENT = gr.State(value=None) # Currently selected proj_client in projects table
+        PROJ_NAME = gr.State(value=None)    # Currently selected proj_name in projects table
+
         # Page header
         gr.Markdown("# iLAB Billing App")
 
@@ -191,7 +274,7 @@ def build_app():
 
         # Build panels
         build_login(pnl_login, pnl_admin, pnl_user, ROLE)
-        build_admin_tabs(pnl_admin)
+        build_admin_tabs(pnl_admin, PROJ_CLIENT, PROJ_NAME)
         build_user_tabs(pnl_user)
 
     return billing_app
