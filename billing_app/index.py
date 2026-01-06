@@ -53,7 +53,11 @@ def login_btn(usr, pwd):
 # Create a project
 def create_proj_btn():
     # Placeholder: implement your "create" logic and return updated state if needed
-    return None, None  # PROJ_CLIENT, PROJ_NAME
+    return (
+        gr.update(visible=True), # pnl_create_proj
+        gr.update(visible=False), # pnl_view_proj_admin
+        # gr.update(visible=False), # pnl_update_proj
+    )
 
 # Read a project
 def proj_id_dd(key):
@@ -168,7 +172,6 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
 
             # 3. Create new project.
             with gr.Row(visible=False) as pnl_create_proj:
-                gr.Markdown('### Create Project')
                 with gr.Column():
                     gr.Markdown('Project Info')
                     tb_c_proj_client = gr.Textbox(label='Client Name', interactive=True)
@@ -187,7 +190,7 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                     tb_c_manager_sig = gr.Textbox(label='Client Signature Required', interactive=True)
                     tb_c_employee_sig = gr.Textbox(label='Employee Signature Required', interactive=True)
                     tb_c_notes = gr.Textbox(label='Timesheet Notes Required', interactive=True)
-                with gr.Row():
+                with gr.Column():
                     btn_c_ok = gr.Button('OK')
                     btn_c_cancel = gr.Button('Cancel')
 
@@ -220,8 +223,9 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                 fn=create_proj_btn,
                 inputs=[],
                 outputs=[
-                    PROJ_CLIENT,    # set state value
-                    PROJ_NAME,      # set state value
+                    pnl_create_proj, # set visible to true
+                    pnl_view_proj_admin, # set visible to false
+                    # pnl_update_proj,    # set visible to false    -- not created yet
                 ]
             )
 
