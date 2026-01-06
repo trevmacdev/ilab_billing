@@ -1,5 +1,5 @@
 
-'''
+"""
 1. Log into application
 2. Display admin tabs for admin profile
 3. Enable CRUD of projects into DB
@@ -8,7 +8,7 @@
 6. Enable download of timesheets in pdf format
 7. Enable display of billing file information
 8. Enable download of billing file in xlsx format.
-'''
+"""
 
 import gradio as gr
 import pandas as pd  # currently unused; keep if you plan to use it later
@@ -17,9 +17,9 @@ from metadata import get_gradio_config
 
 #------------------------------------------------------#
 
-####
+#####
 # START -- EVENT HANDLER FUNCTIONS (FN=)
-####
+#####
 
 # 1. Log into application
 def login_btn(usr, pwd):
@@ -52,20 +52,18 @@ def login_btn(usr, pwd):
 
 # Create a project
 def create_proj_btn():
-    return
+    # Placeholder: implement your "create" logic and return updated state if needed
+    return None, None  # PROJ_CLIENT, PROJ_NAME
 
 # Read a project
 def proj_id_dd(key):
     from db_helper import get_project_info
 
-    # Key returned in the format PROJ_CLIENT - PROJ_NAME
-
-    # Split the key into client and proj name
+    # Key expected in the format "PROJ_CLIENT - PROJ_NAME"
     proj_client, proj_name = key.split(" - ", 1)
 
     # Select * from projects where pk matches key
     proj_info = get_project_info(proj_client, proj_name)
-
 
     # Write project info into field values.
     fld_proj_client = f'Client Name: {proj_info["proj_client"]}'
@@ -78,43 +76,44 @@ def proj_id_dd(key):
     fld_po_number = f'Purchase Order Number: {proj_info["po_number"]}'
     fld_po_period = f'Purchase Order Period: {proj_info["po_period"]}'
     fld_manager_sig = f'Manager Signature Required: {proj_info["manager_sig"]}'
-    fld_employee_sig = f'Manager Signature Required: {proj_info["employee_sig"]}'
+    fld_employee_sig = f'Employee Signature Required: {proj_info["employee_sig"]}'
     fld_notes = f'Timesheet Notes Required: {proj_info["notes"]}'
 
-    return(
+    return (
         proj_client,  # PROJ_CLIENT
         proj_name,    # PROJ_NAME
-        gr.update(Visible=True),     # Project info panel
+        gr.update(visible=True),     # Project info panel
 
-        gr.update(value=fld_proj_client),    # tb_proj_client,
-        gr.update(value=fld_proj_name),    #     tb_proj_name,
-        gr.update(value=fld_job_code),    #    tb_job_code,
-        gr.update(value=fld_ot_rate),    #    tb_ot_rate,
-        gr.update(value=fld_weekend),    #    tb_weekend,
-        gr.update(value=fld_client_manager),    #    tb_client_manager,
-        gr.update(value=fld_ilab_manager),    #    tb_ilab_manager,
-        gr.update(value=fld_po_number),    #    tb_po_num,
-        gr.update(value=fld_po_period),    #    tb_po_period,
-        gr.update(value=fld_manager_sig),    #    tb_manager_sig,
-        gr.update(value=fld_employee_sig),    #    tb_employee_sig,
-        gr.update(value=fld_notes),    #    tb_notes,
+        gr.update(value=fld_proj_client),    # tb_proj_client
+        gr.update(value=fld_proj_name),      # tb_proj_name
+        gr.update(value=fld_job_code),       # tb_job_code
+        gr.update(value=fld_ot_rate),        # tb_ot_rate
+        gr.update(value=fld_weekend),        # tb_weekend
+        gr.update(value=fld_client_manager), # tb_client_manager
+        gr.update(value=fld_ilab_manager),   # tb_ilab_manager
+        gr.update(value=fld_po_number),      # tb_po_num
+        gr.update(value=fld_po_period),      # tb_po_period
+        gr.update(value=fld_manager_sig),    # tb_manager_sig
+        gr.update(value=fld_employee_sig),   # tb_employee_sig
+        gr.update(value=fld_notes),          # tb_notes
     )
 
 # Delete a project
 def delete_proj_btn(proj_client, proj_name):
     from db_helper import delete_project
     delete_project(proj_client, proj_name)
-    return None, None # PROJ_CLIENT and PROJ_NAME
+    # Reset selected state (simple behavior)
+    return None, None  # PROJ_CLIENT and PROJ_NAME
 
-####
+#####
 # END -- EVENT HANDLER FUNCTIONS (FN=)
-####
+#####
 
 #------------------------------------------------------#
 
-####
+#####
 # START -- GUI MODULES AND EVENT HANDLERS
-####
+#####
 
 # 1. Log into application
 def build_login(parent, pnl_admin, pnl_user, ROLE):
@@ -143,32 +142,57 @@ def build_login(parent, pnl_admin, pnl_user, ROLE):
 
 # 2. Build administrator tabs
 def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
-    from db_helper import(
-        get_client_and_proj,
-        # delete_project,
-    )
+    from db_helper import get_client_and_proj
 
-    # Retrieve metadata
-
-    projects = get_client_and_proj()
-        
     # Build the tab
     with parent:
         with gr.Tab("Manage Projects"):
+            # Retrieve list of "CLIENT - PROJECT" strings
+            projects = get_client_and_proj()
+
+            # Choose a valid default value (either the first project or None)
+            default_value = projects[0] if projects and isinstance(projects[0], str) else None
+
             gr.Markdown("### Manage Projects (Admin)")
             dd_proj_id = gr.Dropdown(
                 label="Client - Project",
                 choices=projects,
-                value=f'{PROJ_CLIENT} - {PROJ_NAME}',
-                filterable=True)
+                value=default_value,
+                filterable=True
+            )
 
-            with gr.Row():
+            with gr.Row() as action_row:
                 btn_create_proj = gr.Button("New Project")
-                # btn_read_proj = gr.Button("View Project")
                 btn_update_proj = gr.Button("Update Project")
                 btn_delete_proj = gr.Button("Delete Project")
 
-            with gr.Row("Project Info", visible=False) as pnl_view_proj_admin:
+            # 3. Create new project.
+            with gr.Row(visible=False) as pnl_create_proj:
+                gr.Markdown('### Create Project')
+                with gr.Column():
+                    gr.Markdown('Project Info')
+                    tb_c_proj_client = gr.Textbox(label='Client Name', interactive=True)
+                    tb_c_proj_name = gr.Textbox(label='Project Name', interactive=True)
+                    tb_c_job_code = gr.Textbox(label='Job Code (as per TSheet Job Code 3)', interactive=True)
+                    tb_c_ot_rate = gr.Textbox(label='Overtime Rates', interactive=True)
+                    tb_c_weekend = gr.Textbox(label='Weekend Days', interactive=True)
+                with gr.Column():
+                    gr.Markdown('Personnel and PO details')
+                    tb_c_client_manager = gr.Textbox(label='Client Manager', interactive=True)
+                    tb_c_ilab_manager = gr.Textbox(label='iLAB Manager', interactive=True)
+                    tb_c_po_num = gr.Textbox(label='PO Number', interactive=True)
+                    tb_c_po_period = gr.Textbox(label='PO Period', interactive=True)
+                with gr.Column():
+                    gr.Markdown('Timesheet instructions')
+                    tb_c_manager_sig = gr.Textbox(label='Client Signature Required', interactive=True)
+                    tb_c_employee_sig = gr.Textbox(label='Employee Signature Required', interactive=True)
+                    tb_c_notes = gr.Textbox(label='Timesheet Notes Required', interactive=True)
+                with gr.Row():
+                    btn_c_ok = gr.Button('OK')
+                    btn_c_cancel = gr.Button('Cancel')
+
+            # 3. Read project details
+            with gr.Row(visible=False) as pnl_view_proj_admin:
                 gr.Markdown('### Project Information')
                 with gr.Column():
                     gr.Markdown('Project Info')
@@ -189,23 +213,21 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                     tb_employee_sig = gr.Textbox(interactive=False)
                     tb_notes = gr.Textbox(interactive=False)
 
+            
 
             # 3. CRUD projects
             btn_create_proj.click(      # create
                 fn=create_proj_btn,
-                inputs=[
-                ],
+                inputs=[],
                 outputs=[
                     PROJ_CLIENT,    # set state value
                     PROJ_NAME,      # set state value
                 ]
             )
 
-            dd_proj_id.change(             # read
+            dd_proj_id.change(          # read
                 fn=proj_id_dd,
-                inputs=[
-                    dd_proj_id.value,
-                ],
+                inputs=[dd_proj_id],    # pass the component, not its .value
                 outputs=[
                     PROJ_CLIENT,    # set state value
                     PROJ_NAME,      # set state value
@@ -252,12 +274,6 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                 inputs=[emp_name, emp_role],
                 outputs=[emp_out],
             )
-            
-            
-
-
-
-
 
     return
 
@@ -292,15 +308,15 @@ def build_user_tabs(parent):
             )
     return
 
-####
+#####
 # END -- GUI MODULES AND EVENT HANDLERS
-####
+#####
 
 #------------------------------------------------------#
 
-####
+#####
 # START -- GUI CONTROL BLOCK (CALL GUI MODULES)
-####
+#####
 
 def build_app():
     with gr.Blocks(title="Billing App") as billing_app:
@@ -308,7 +324,7 @@ def build_app():
         ROLE = gr.State(value=None)  # 1. Log into application - can be admin or user
 
         PROJ_CLIENT = gr.State(value=None) # Currently selected proj_client in projects table
-        PROJ_NAME = gr.State(value=None)    # Currently selected proj_name in projects table
+        PROJ_NAME = gr.State(value=None)   # Currently selected proj_name in projects table
 
         # Page header
         gr.Markdown("# iLAB Billing App")
@@ -325,15 +341,15 @@ def build_app():
 
     return billing_app
 
-####
+#####
 # END -- GUI CONTROL BLOCK (CALL GUI MODULES)
-####
+#####
 
 #------------------------------------------------------#
 
-####
+#####
 #   START SERVER
-####
+#####
 
 gradio_config = get_gradio_config()
 
