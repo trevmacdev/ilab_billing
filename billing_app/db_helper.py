@@ -24,8 +24,10 @@ def get_db_connection():
 
     return cn
 
+
+
 ####
-# START - INSERTING DATA
+# START - INSERT STATEMENTS
 ####
 
 # The project table contains a list of projects per client and purchase order. Billing is generally caried out per purchase order
@@ -69,5 +71,35 @@ def projects_insert(
 
 
 ####
-# END - INSERTING DATA
+# END - INSERT STATEMENTS
+####
+
+#----------------------------------------------
+
+####
+# START - SELECT STATEMENTS
+####
+
+# Return client and project name
+def get_client_and_proj():
+    
+    cn = get_db_connection()
+
+    cr = cn.cursor()
+    cr.callproc("sp_get_projects_clients")
+
+    choices = []
+    for result in cr.stored_results():
+        for row in result.fetchall():
+            proj_client, proj_name = row[0], row[1]
+            display = f'{proj_client} - {proj_name}'
+            choices.append(display)
+    
+    cr.close()
+    cn.close()
+    
+    return choices
+
+####
+# END - SELECT STATEMENTS
 ####
