@@ -103,3 +103,26 @@ def get_client_and_proj():
 ####
 # END - SELECT STATEMENTS
 ####
+
+#----------------------------------------------
+
+# sp_delete_project
+
+####
+# START - DELETE STATEMENTS
+####
+
+def delete_project(proj_client, proj_name):
+
+    cn = get_db_connection()
+    cr = cn.cursor()
+
+    cr.callproc('sp_delete_project', [proj_client, proj_name])
+
+    cr.close()
+    cn.close()
+    return
+
+####
+# END - DELETE STATEMENTS
+####
