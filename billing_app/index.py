@@ -56,21 +56,48 @@ def create_proj_btn():
 
 # Read a project
 def proj_id_dd(key):
-    # Key returned in the format PROJ_CLIENT - PROJ_NAME
-    # Split the key into client and proj name
+    from db_helper import get_project_info
 
+    # Key returned in the format PROJ_CLIENT - PROJ_NAME
+
+    # Split the key into client and proj name
     proj_client, proj_name = key.split(" - ", 1)
 
     # Select * from projects where pk matches key
+    proj_info = get_project_info(proj_client, proj_name)
 
-    # Update the state veriables
 
-    # Make visible and populate the project information fields with select * results.
+    # Write project info into field values.
+    fld_proj_client = f'Client Name: {proj_info["proj_client"]}'
+    fld_proj_name = f'Project Name: {proj_info["proj_name"]}'
+    fld_job_code = f'Job Code (must match TSheet Job Code #3): {proj_info["job_code"]}'
+    fld_ot_rate = f'Overtime Rates: {proj_info["ot_rate"]}'
+    fld_weekend = f'Weekend days: {proj_info["weekend"]}'
+    fld_client_manager = f'Client Manager: {proj_info["client_manager"]}'
+    fld_ilab_manager = f'iLAB Manager: {proj_info["ilab_manager"]}'
+    fld_po_number = f'Purchase Order Number: {proj_info["po_number"]}'
+    fld_po_period = f'Purchase Order Period: {proj_info["po_period"]}'
+    fld_manager_sig = f'Manager Signature Required: {proj_info["manager_sig"]}'
+    fld_employee_sig = f'Manager Signature Required: {proj_info["employee_sig"]}'
+    fld_notes = f'Timesheet Notes Required: {proj_info["notes"]}'
 
     return(
         proj_client,  # PROJ_CLIENT
         proj_name,    # PROJ_NAME
-        gr.update(Visible=True)     # Project info panel
+        gr.update(Visible=True),     # Project info panel
+
+        gr.update(value=fld_proj_client),    # tb_proj_client,
+        gr.update(value=fld_proj_name),    #     tb_proj_name,
+        gr.update(value=fld_job_code),    #    tb_job_code,
+        gr.update(value=fld_ot_rate),    #    tb_ot_rate,
+        gr.update(value=fld_weekend),    #    tb_weekend,
+        gr.update(value=fld_client_manager),    #    tb_client_manager,
+        gr.update(value=fld_ilab_manager),    #    tb_ilab_manager,
+        gr.update(value=fld_po_number),    #    tb_po_num,
+        gr.update(value=fld_po_period),    #    tb_po_period,
+        gr.update(value=fld_manager_sig),    #    tb_manager_sig,
+        gr.update(value=fld_employee_sig),    #    tb_employee_sig,
+        gr.update(value=fld_notes),    #    tb_notes,
     )
 
 # Delete a project
@@ -141,6 +168,27 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                 btn_update_proj = gr.Button("Update Project")
                 btn_delete_proj = gr.Button("Delete Project")
 
+            with gr.Row("Project Info", visible=False) as pnl_view_proj_admin:
+                gr.Markdown('### Project Information')
+                with gr.Column():
+                    gr.Markdown('Project Info')
+                    tb_proj_client = gr.Textbox(interactive=False)
+                    tb_proj_name = gr.Textbox(interactive=False)
+                    tb_job_code = gr.Textbox(interactive=False)
+                    tb_ot_rate = gr.Textbox(interactive=False)
+                    tb_weekend = gr.Textbox(interactive=False)
+                with gr.Column():
+                    gr.Markdown('Personnel and PO details')
+                    tb_client_manager = gr.Textbox(interactive=False)
+                    tb_ilab_manager = gr.Textbox(interactive=False)
+                    tb_po_num = gr.Textbox(interactive=False)
+                    tb_po_period = gr.Textbox(interactive=False)
+                with gr.Column():
+                    gr.Markdown('Timesheet instructions')
+                    tb_manager_sig = gr.Textbox(interactive=False)
+                    tb_employee_sig = gr.Textbox(interactive=False)
+                    tb_notes = gr.Textbox(interactive=False)
+
 
             # 3. CRUD projects
             btn_create_proj.click(      # create
@@ -148,8 +196,8 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                 inputs=[
                 ],
                 outputs=[
-                    PROJ_CLIENT,
-                    PROJ_NAME,
+                    PROJ_CLIENT,    # set state value
+                    PROJ_NAME,      # set state value
                 ]
             )
 
@@ -158,7 +206,24 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                 inputs=[
                     dd_proj_id.value,
                 ],
-                outputs=[]
+                outputs=[
+                    PROJ_CLIENT,    # set state value
+                    PROJ_NAME,      # set state value
+                    pnl_view_proj_admin, # set visible true
+                    # project field values / content
+                    tb_proj_client,
+                    tb_proj_name,
+                    tb_job_code,
+                    tb_ot_rate,
+                    tb_weekend,
+                    tb_client_manager,
+                    tb_ilab_manager,
+                    tb_po_num,
+                    tb_po_period,
+                    tb_manager_sig,
+                    tb_employee_sig,
+                    tb_notes,
+                ]
             )
 
             btn_delete_proj.click(      # delete
@@ -188,26 +253,7 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                 outputs=[emp_out],
             )
             
-            with gr.Row("Project Info", visible=False) as pnl_view_proj_admin:
-                gr.Markdown('### Project Information')
-                with gr.Column():
-                    gr.Markdown('Project Info')
-                    tb_proj_client = gr.Textbox()
-                    tb_proj_name = gr.Textbox()
-                    tb_job_code = gr.Textbox()
-                    tb_ot_rate = gr.Textbox()
-                    tb_weekend = gr.Textbox()
-                with gr.Column():
-                    gr.Markdown('Personnel and PO details')
-                    tb_client_manager = gr.Textbox()
-                    tb_ilab_manager = gr.Textbox()
-                    tb_po_num = gr.Textbox()
-                    tb_po_period = gr.Textbox()
-                with gr.Column():
-                    gr.Markdown('Timesheet instructions')
-                    tb_manager_sig = gr.Textbox()
-                    tb_employee_sig = gr.Textbox()
-                    tb_notes = gr.Textbox()
+            
 
 
 
