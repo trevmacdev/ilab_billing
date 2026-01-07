@@ -141,6 +141,7 @@ def proj_id_dd(key):    # Display selected project details.
         proj_client,  # PROJ_CLIENT
         proj_name,    # PROJ_NAME
         gr.update(visible=True),     # Project info panel
+        gr.update(visible=False),    # Project creation panel
 
         gr.update(value=fld_proj_client),    # tb_proj_client
         gr.update(value=fld_proj_name),      # tb_proj_name
@@ -343,6 +344,7 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):   # Interface for administ
                     PROJ_CLIENT,    # set state value
                     PROJ_NAME,      # set state value
                     pnl_view_proj_admin, # set visible true
+                    pnl_create_proj, # set visible false
                     # project field values / content
                     tb_proj_client,
                     tb_proj_name,
