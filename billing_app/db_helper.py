@@ -16,8 +16,6 @@ def get_db_connection():
             port = details['port'],
             autocommit = True
         )
-        if cn.is_connected():
-            print('Connected to database')
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -141,7 +139,7 @@ def get_employees():
 
     cr.close()
     cn.close()
-    
+
     return choices
 
 def get_empl_projects(f_name, l_name):
