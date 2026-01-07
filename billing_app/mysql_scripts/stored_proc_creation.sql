@@ -1,6 +1,8 @@
 
 DELIMITER $$
 
+-- PROJECTS TABLE
+
 CREATE PROCEDURE si_get_projects_clients()
 BEGIN
     SELECT
@@ -37,32 +39,7 @@ BEGIN
 END $$
 
 
-CREATE PROCEDURE sp_create_employee_insert(
-    in i_f_name varchar(50),
-    in i_l_name varchar(50),
-    in i_proj_client varchar(50),
-    in i_proj_name varchar(50),
-    in i_rate float,
-    in i_emp_role varchar(10)
-)
-BEGIN
-	INSERT INTO employees(
-		f_name,
-		l_name,
-		proj_client,
-		proj_name,
-		rate,
-		emp_role
-    )
-    VALUES(
-		i_f_name,
-		i_l_name,
-		i_proj_client,
-		i_proj_name,
-		i_rate,
-		i_emp_role
-    );
-END $$
+
 
 CREATE PROCEDURE sp_create_project_insert (
     IN i_proj_client   VARCHAR(50),
@@ -113,6 +90,57 @@ BEGIN
 
 END$$
 
+-- EMPLOYEES TABLE
+
+CREATE PROCEDURE sp_create_employee_insert(
+    in i_f_name varchar(50),
+    in i_l_name varchar(50),
+    in i_proj_client varchar(50),
+    in i_proj_name varchar(50),
+    in i_rate float,
+    in i_emp_role varchar(10)
+)
+BEGIN
+	INSERT INTO employees(
+		f_name,
+		l_name,
+		proj_client,
+		proj_name,
+		rate,
+		emp_role
+    )
+    VALUES(
+		i_f_name,
+		i_l_name,
+		i_proj_client,
+		i_proj_name,
+		i_rate,
+		i_emp_role
+    );
+END $$
+
+CREATE PROCEDURE sp_get_employees_dist()
+BEGIN
+	SELECT DISTINCT f_name, l_name
+    FROM employees
+    ORDER BY f_name, l_name
+    ;
+END$$
+
+CREATE PROCEDURE sp_get_empl_projects(
+	in i_f_name varchar(50),
+    in i_l_name varchar(50)
+)
+BEGIN
+	SELECT proj_client, proj_name
+    FROM employees
+    WHERE
+		fname = i_f_name
+	AND
+		l_name = i_l_name
+	ORDER BY proj_client, proj_name
+	;
+END$$
 
 
 DELIMITER ;
