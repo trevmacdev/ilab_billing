@@ -369,18 +369,19 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):   # Interface for administ
 
         with gr.Tab("Manage Employees"):    # Employee management tab
             gr.Markdown("### Manage Employees (Admin)")
-            emp_name = gr.Textbox(label="Employee Name")
-            emp_role = gr.Dropdown(
-                label="Role",
-                choices=["Developer", "Tester", "Project Manager", "Analyst"],
-            )
-            btn_add_emp = gr.Button("Add Employee")
-            emp_out = gr.Textbox(label="Result", interactive=False)
-            btn_add_emp.click(
-                lambda n, r: f"[ADMIN] Employee added: {n} - {r}",
-                inputs=[emp_name, emp_role],
-                outputs=[emp_out],
-            )
+            with gr.Row():  # Dropdowns enable filtering by client, project and employee
+                dd_e_filter_client = gr.Dropdown(label='Clients',)
+                dd_e_filter_project = gr.Dropdown(label='Projects',)
+                dd_e_filter_fname = gr.Dropdown(label='Empl. First Name')
+                dd_e_filter_lname = gr.Dropdown(label='Empl. Last Name',)
+            dd_client_proj_empl = gr.Dropdown(label='Client - Project - Employee',)
+            
+            gr.Markdown('The client, project and employee information is treated as one entitiy.')
+            gr.Markdown('The project must exist before the employee can be created (see Manage Projects tab)')
+            with gr.Row():  # Buttons to add, edit and delete and employee
+                btn_e_create_empl = gr.Button('Add Employee')
+                btn_e_update_empl = gr.Button('Update Employee')
+                btn_e_delete_empl = gr.Button('Delete Employee')
 
     return
 
