@@ -157,13 +157,21 @@ def proj_id_dd(key):    # Display selected project details.
         gr.update(value=fld_notes),          # tb_notes
     )
 
-
 # Delete a project
 def delete_proj_btn(proj_client, proj_name):    # Delete the selected project from database.
-    from db_helper import delete_project
+    from db_helper import delete_project, get_client_and_proj
     delete_project(proj_client, proj_name)
+
+    # Get and assign a new list of choices for the project selection dropdown.
+    choices = get_client_and_proj()
+
     # Reset selected state (simple behavior)
-    return None, None  # PROJ_CLIENT and PROJ_NAME
+    return ( # State, remove choice from dropdown, reset dropdown
+        None, None,  # PROJ_CLIENT and PROJ_NAME
+        gr.update(choices=choices),  # Update dd_proj_id choice list
+        gr.update(value=choices[0]), # Activate first choice in dd_proj_id
+
+    )
 
 
 #####
@@ -361,6 +369,8 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):   # Interface for administ
                 outputs=[
                     PROJ_CLIENT,
                     PROJ_NAME,
+                    dd_proj_id,
+                    dd_proj_id,
                 ]
             )
 
