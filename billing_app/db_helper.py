@@ -41,6 +41,7 @@ def projects_insert(
     manager_sig,
     employee_sig,
     notes,
+    weekend,
     rate,
     po_start_date,
     po_end_date
@@ -51,7 +52,7 @@ def projects_insert(
         cur = cn.cursor()
         
         # Call stored proc
-        cur.callproc('sp_insert_project',[
+        cur.callproc('sp_create_project_insert',[
             proj_client,
             proj_name,
             po_num,
