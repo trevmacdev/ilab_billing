@@ -42,7 +42,8 @@ def projects_insert(
         notes,
         weekend,
         ot_rate,
-        po_period
+        po_start_date,
+        po_end_date
 ):
     cn = get_db_connection()
 
@@ -61,7 +62,8 @@ def projects_insert(
             notes,
             weekend,
             ot_rate,
-            po_period
+            po_start_date,
+            po_end_date
             ]
         )
         
