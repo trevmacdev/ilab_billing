@@ -195,7 +195,8 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                     tb_c_client_manager = gr.Textbox(label='Client Manager', interactive=True)
                     tb_c_ilab_manager = gr.Textbox(label='iLAB Manager', interactive=True)
                     tb_c_po_num = gr.Textbox(label='PO Number', interactive=True)
-                    tb_c_po_period = gr.Textbox(label='PO Period', interactive=True)
+                    tb_c_po_start_date = gr.Textbox(label='PO Start Date', interactive=True)
+                    tb_c_po_end_date = gr.Textbox(label='PO End Date', interactive=True)
                 with gr.Column():
                     gr.Markdown('Timesheet instructions')
                     tb_c_manager_sig = gr.Textbox(label='Client Signature Required', interactive=True)
