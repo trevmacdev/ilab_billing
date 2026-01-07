@@ -62,6 +62,7 @@ def projects_insert(
             manager_sig,
             employee_sig,
             notes,
+            weekend,
             rate,
             po_start_date,
             po_end_date
