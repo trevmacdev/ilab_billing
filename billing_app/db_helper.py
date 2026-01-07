@@ -119,8 +119,48 @@ def get_project_info(proj_client, proj_name):
             result_row = rows[0]
         break
 
+    
+    cr.close()
+    cn.close()
 
     return result_row
+
+def get_employees():
+    
+    cn = get_db_connection()
+    cr = cn.cursor()
+
+    cr.callproc('sp_get_employees_dist')
+
+    choices = []
+    for result in cr.stored_results():
+        for row in result.fetchall():
+            f_name, l_name = row[0], row[1]
+            display = f'{f_name} | {l_name}'
+            choices.append(display)
+
+    cr.close()
+    cn.close()
+    
+    return choices
+
+def get_empl_projects(f_name, l_name):
+    cn = get_db_connection()
+    cr = cn.cursor()
+
+    cr.callproc('sp_get_empl_projects', [f_name, l_name])
+
+    choices = []
+    for result in cr.stored_results():
+        for row in result.fetchall():
+            client, proj = row[0], row[1]
+            display = f'{f_name} | {l_name} | {client} | {proj}'
+            choices.append(display)
+
+    cr.close()
+    cn.close()
+
+    return choices
 
 ####
 # END - SELECT STATEMENTS
