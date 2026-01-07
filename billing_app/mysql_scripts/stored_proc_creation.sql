@@ -25,19 +25,7 @@ END $$
 
 CREATE PROCEDURE si_get_project_details(
 	IN i_proj_client varchar(50),
-    IN i_proj_name	varchar(50),
-    out o_proj_client varchar(50),
-    out o_proj_name varchar(50),
-    OUT o_po_num varchar(50),si_delete_projectsi_delete_projectsi_get_project_details
-    OUT o_client_manager varchar(50),
-    out o_ilab_manager varchar(50),
-    out o_job_code varchar(50),
-    out o_manager_sig tinyint(1),
-    out o_employee_sig tinyint(1),
-    out o_notes tinyint(1),
-    out o_weekend json,
-    out o_rate json,
-    out o_po_period varchar(255)
+    IN i_proj_name	varchar(50)
 )
 BEGIN
 	SELECT *
