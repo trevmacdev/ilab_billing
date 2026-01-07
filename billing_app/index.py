@@ -114,6 +114,8 @@ def c_ok_btn(       # Upload a new project to the database.
 def proj_id_dd(key):    # Display selected project details.
     from db_helper import get_project_info
 
+    print('Triggered proj_id_dd on dropbox change')
+
     # Key expected in the format "PROJ_CLIENT - PROJ_NAME"
     proj_client, proj_name = key.split(" - ", 1)
 
@@ -128,7 +130,7 @@ def proj_id_dd(key):    # Display selected project details.
     fld_weekend = f'Weekend days: {proj_info["weekend"]}'
     fld_client_manager = f'Client Manager: {proj_info["client_manager"]}'
     fld_ilab_manager = f'iLAB Manager: {proj_info["ilab_manager"]}'
-    fld_po_number = f'Purchase Order Number: {proj_info["po_number"]}'
+    fld_po_number = f'Purchase Order Number: {proj_info["po_num"]}'
     fld_po_start_date = f'PO Start Date: {proj_info["po_start_date"]}'
     fld_po_end_date = f'PO End Date: {proj_info["po_end_date"]}'
     fld_manager_sig = f'Manager Signature Required: {proj_info["manager_sig"]}'
@@ -222,7 +224,7 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):   # Interface for administ
                 filterable=True
             )
 
-            with gr.Row() as action_row:        # Buttons to create, update and delete a project.
+            with gr.Row() as action_row:        # Buttons to create, update, delete a project.
                 btn_create_proj = gr.Button("New Project")
                 btn_update_proj = gr.Button("Update Project")
                 btn_delete_proj = gr.Button("Delete Project")
@@ -254,7 +256,6 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):   # Interface for administ
 
             # 3. Read project details
             with gr.Row(visible=False) as pnl_view_proj_admin:  # View project information
-                gr.Markdown('### Project Information')
                 with gr.Column():   # project info
                     gr.Markdown('Project Info')
                     tb_proj_client = gr.Textbox(interactive=False)
