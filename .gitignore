@@ -1,5 +1,7 @@
 .vscode/
 src/__pycache__/
+billing_app/auth/__pycache__/
+billing_app/managers/__pycache__/
 src/scratch/
 src/.gradio/
 src/tsheets/
