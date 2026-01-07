@@ -87,7 +87,8 @@ def proj_id_dd(key):
     fld_client_manager = f'Client Manager: {proj_info["client_manager"]}'
     fld_ilab_manager = f'iLAB Manager: {proj_info["ilab_manager"]}'
     fld_po_number = f'Purchase Order Number: {proj_info["po_number"]}'
-    fld_po_period = f'Purchase Order Period: {proj_info["po_period"]}'
+    fld_po_start_date = f'PO Start Date: {proj_info["po_start_date"]}'
+    fld_po_end_date = f'PO End Date: {proj_info["po_end_date"]}'
     fld_manager_sig = f'Manager Signature Required: {proj_info["manager_sig"]}'
     fld_employee_sig = f'Employee Signature Required: {proj_info["employee_sig"]}'
     fld_notes = f'Timesheet Notes Required: {proj_info["notes"]}'
@@ -105,7 +106,8 @@ def proj_id_dd(key):
         gr.update(value=fld_client_manager), # tb_client_manager
         gr.update(value=fld_ilab_manager),   # tb_ilab_manager
         gr.update(value=fld_po_number),      # tb_po_num
-        gr.update(value=fld_po_period),      # tb_po_period
+        gr.update(value=fld_po_start_date),  # tb_po_start_date
+        gr.update(value=fld_po_end_date),    # tb_po_end_date
         gr.update(value=fld_manager_sig),    # tb_manager_sig
         gr.update(value=fld_employee_sig),   # tb_employee_sig
         gr.update(value=fld_notes),          # tb_notes
@@ -218,7 +220,8 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                     tb_client_manager = gr.Textbox(interactive=False)
                     tb_ilab_manager = gr.Textbox(interactive=False)
                     tb_po_num = gr.Textbox(interactive=False)
-                    tb_po_period = gr.Textbox(interactive=False)
+                    tb_po_start_date = gr.Textbox(interactive=False)
+                    tb_po_end_date = gr.Textbox(interactive=False)
                 with gr.Column():
                     gr.Markdown('Timesheet instructions')
                     tb_manager_sig = gr.Textbox(interactive=False)
@@ -264,7 +267,8 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                     tb_client_manager,
                     tb_ilab_manager,
                     tb_po_num,
-                    tb_po_period,
+                    tb_po_start_date,
+                    tb_po_end_date,
                     tb_manager_sig,
                     tb_employee_sig,
                     tb_notes,
