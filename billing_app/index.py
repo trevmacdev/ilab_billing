@@ -3,24 +3,22 @@
 1. Log into application
 2. Display admin tabs for admin profile
 3. Enable CRUD of projects into DB
-4. Enable CRUD of employees into DB
-5. Enable upload and display of selected project timesheeets
-6. Enable download of timesheets in pdf format
-7. Enable display of billing file information
-8. Enable download of billing file in xlsx format.
+4. Display user tabs for user profile
+5. Enable CRUD of employees into DB
+6. Enable upload and display of selected project timesheeets
+7. Enable download of timesheets in pdf format
+8. Enable display of billing file information
+9. Enable download of billing file in xlsx format.
 """
 
 import gradio as gr
 import pandas as pd  # currently unused; keep if you plan to use it later
-
 from metadata import get_gradio_config
 
 #------------------------------------------------------#
-
 #####
 # START -- EVENT HANDLER FUNCTIONS (FN=)
 #####
-
 
 # 1. Log into application
 def login_btn(usr, pwd):    # Log user in and display dashboard based on role
@@ -49,7 +47,6 @@ def login_btn(usr, pwd):    # Log user in and display dashboard based on role
         None                       # ROLE value
     )
 
-
 # 3. CRUD Projects
 
 # Create a project
@@ -59,7 +56,6 @@ def create_proj_btn():  # Open the create project interface so user can enter pr
         gr.update(visible=True),   # pnl_create_proj
         gr.update(visible=False),  # pnl_view_proj_admin
     )
-
 
 # Insert project details into projects table.
 def c_ok_btn(       # Upload a new project to the database.
@@ -109,7 +105,6 @@ def c_ok_btn(       # Upload a new project to the database.
         proj_client, proj_name,
     )
 
-
 # Read a project
 def proj_id_dd(key):    # Display selected project details.
     from db_helper import get_project_info
@@ -158,6 +153,8 @@ def proj_id_dd(key):    # Display selected project details.
         gr.update(value=fld_notes),          # tb_notes
     )
 
+# TODO: Create Update functionality by changing the project info fields to interactable and updating the record on btn_update click.
+
 # Delete a project
 def delete_proj_btn(proj_client, proj_name):    # Delete the selected project from database.
     from db_helper import delete_project, get_client_and_proj
@@ -174,18 +171,13 @@ def delete_proj_btn(proj_client, proj_name):    # Delete the selected project fr
 
     )
 
-
 #####
 # END -- EVENT HANDLER FUNCTIONS (FN=)
 #####
-
-
 #------------------------------------------------------#
-
 #####
 # START -- GUI MODULES AND EVENT HANDLERS
 #####
-
 
 # 1. Log into application
 def build_login(parent, pnl_admin, pnl_user, ROLE): # Interface for user login
@@ -210,7 +202,6 @@ def build_login(parent, pnl_admin, pnl_user, ROLE): # Interface for user login
         "btn_login": btn_login,
         "msg": msg,
     }
-
 
 # 2. Build administrator tabs
 def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):   # Interface for administration tabs
@@ -393,7 +384,6 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):   # Interface for administ
 
     return
 
-
 # 3. Build user tabs
 def build_user_tabs(parent):    # Interface for user tabs
     with parent:
@@ -425,18 +415,13 @@ def build_user_tabs(parent):    # Interface for user tabs
             )
     return
 
-
 #####
 # END -- GUI MODULES AND EVENT HANDLERS
 #####
-
-
 #------------------------------------------------------#
-
 #####
 # START -- GUI CONTROL BLOCK (CALL GUI MODULES)
 #####
-
 
 def build_app():
     with gr.Blocks(title="Billing App") as billing_app:
@@ -461,18 +446,13 @@ def build_app():
 
     return billing_app
 
-
 #####
 # END -- GUI CONTROL BLOCK (CALL GUI MODULES)
 #####
-
-
 #------------------------------------------------------#
-
 #####
 #   START SERVER
 #####
-
 
 gradio_config = get_gradio_config()
 
