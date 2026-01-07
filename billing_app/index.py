@@ -205,7 +205,12 @@ def build_login(parent, pnl_admin, pnl_user, ROLE): # Interface for user login
 
 # 2. Build administrator tabs
 def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):   # Interface for administration tabs
-    from db_helper import get_client_and_proj
+    from db_helper import(
+        get_client_and_proj, 
+        get_employees,
+        get_empl_projects,
+    )
+
 
     # Build the tab
     with parent:
@@ -368,13 +373,13 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):   # Interface for administ
             )
 
         with gr.Tab("Manage Employees"):    # Employee management tab
+            # Get employee dropbox info from DB
+            empl = get_employees()
             gr.Markdown("### Manage Employees (Admin)")
-            with gr.Row():  # Dropdowns enable filtering by client, project and employee
-                dd_e_filter_client = gr.Dropdown(label='Clients',)
-                dd_e_filter_project = gr.Dropdown(label='Projects',)
-                dd_e_filter_fname = gr.Dropdown(label='Empl. First Name')
-                dd_e_filter_lname = gr.Dropdown(label='Empl. Last Name',)
-            dd_client_proj_empl = gr.Dropdown(label='Client - Project - Employee',)
+            dd_client_proj_empl = gr.Dropdown(      # Select Employee - Client - Project
+                label='Client - Project - Employee',
+                choices=None
+                )
             
             gr.Markdown('The client, project and employee information is treated as one entitiy.')
             gr.Markdown('The project must exist before the employee can be created (see Manage Projects tab)')
@@ -428,6 +433,8 @@ def build_app():
     with gr.Blocks(title="Billing App") as billing_app:
         # STATE VARIABLES
         ROLE = gr.State(value=None)  # 1. Log into application - can be admin or user
+
+        EMPL = gr.State({'fname': None, 'l_name': None, 'client': None, 'proj': None})
 
         PROJ_CLIENT = gr.State(value=None) # Currently selected proj_client in projects table
         PROJ_NAME = gr.State(value=None)   # Currently selected proj_name in projects table
