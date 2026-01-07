@@ -59,6 +59,15 @@ def create_proj_btn():
         # gr.update(visible=False), # pnl_update_proj
     )
 
+# Insert project details into projects table.
+def c_ok_btn():
+
+    # call stored proc to insert into db
+
+    # set project state variables to the new project
+    # clear pnl_create_proj fields and add pnl_create_proj to view project dropdown.
+    return
+
 # Read a project
 def proj_id_dd(key):
     from db_helper import get_project_info
@@ -219,6 +228,7 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
             
 
             # 3. CRUD projects
+            # Create projects
             btn_create_proj.click(      # create
                 fn=create_proj_btn,
                 inputs=[],
@@ -229,6 +239,15 @@ def build_admin_tabs(parent, PROJ_CLIENT, PROJ_NAME):
                 ]
             )
 
+            btn_c_ok.click(
+                fn=c_ok_btn,
+                inputs=[],
+                outputs=[],
+            )
+            
+            # TODO: btn_c_cancel.click needs to clear the pnl_create_proj fields, hide pnl_create_proj and show pnl_view_proj_admin
+
+            # Read projects
             dd_proj_id.change(          # read
                 fn=proj_id_dd,
                 inputs=[dd_proj_id],    # pass the component, not its .value
