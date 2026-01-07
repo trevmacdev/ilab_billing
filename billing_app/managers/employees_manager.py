@@ -22,7 +22,6 @@ class EmployeesManager:
         with parent:
             with gr.Tab("Manage Employees"):
                 empl = get_employees()
-                empl_proj = get_empl_projects()
 
                 gr.Markdown("### Manage Employees (Admin)")
                 dd_client_proj_empl = gr.Dropdown(
