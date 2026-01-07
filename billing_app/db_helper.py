@@ -32,18 +32,18 @@ def get_db_connection():
 
 # The project table contains a list of projects per client and purchase order. Billing is generally caried out per purchase order
 def projects_insert(
-        po_num,
-        proj_client,
-        proj_name,
-        proj_manager,
-        job_code,
-        manager_sig,
-        employee_sig,
-        notes,
-        weekend,
-        ot_rate,
-        po_start_date,
-        po_end_date
+    proj_client,
+    proj_name,
+    po_num,
+    client_manager,
+    ilab_manager,
+    job_code,
+    manager_sig,
+    employee_sig,
+    notes,
+    rate,
+    po_start_date,
+    po_end_date
 ):
     cn = get_db_connection()
 
@@ -51,17 +51,17 @@ def projects_insert(
         cur = cn.cursor()
         
         # Call stored proc
-        cur.callproc('insert_project',[
-            po_num,
+        cur.callproc('sp_insert_project',[
             proj_client,
             proj_name,
-            proj_manager,
+            po_num,
+            client_manager,
+            ilab_manager,
             job_code,
             manager_sig,
             employee_sig,
             notes,
-            weekend,
-            ot_rate,
+            rate,
             po_start_date,
             po_end_date
             ]
