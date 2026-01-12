@@ -22,13 +22,13 @@ def get_db_connection():
 
     return cn
 
-
-
 ####
 # START - INSERT STATEMENTS
 ####
 
 # The project table contains a list of projects per client and purchase order. Billing is generally caried out per purchase order
+
+# Add a new project
 def projects_insert(
     proj_client,
     proj_name,
@@ -43,7 +43,7 @@ def projects_insert(
     rate,
     po_start_date,
     po_end_date
-):
+    ):
     cn = get_db_connection()
 
     try:
@@ -71,18 +71,15 @@ def projects_insert(
         cur.close()
         cn.close()
 
-
 ####
 # END - INSERT STATEMENTS
 ####
-
 #----------------------------------------------
-
 ####
 # START - SELECT STATEMENTS
 ####
 
-# Return client and project name
+# Return proj_client and proj_name from projects
 def get_client_and_proj():
     
     cn = get_db_connection()
@@ -102,7 +99,7 @@ def get_client_and_proj():
     
     return choices
 
-# Return project information
+# Return app project information from projects
 def get_project_info(proj_client, proj_name):
 
     cn = get_db_connection()
@@ -123,7 +120,8 @@ def get_project_info(proj_client, proj_name):
 
     return result_row
 
-def get_employees():
+# Return employee names from employees
+def get_employee_names():
     
     cn = get_db_connection()
     cr = cn.cursor()
@@ -142,6 +140,7 @@ def get_employees():
 
     return choices
 
+# return employee projects from employees
 def get_empl_projects(f_name, l_name):
     cn = get_db_connection()
     cr = cn.cursor()
@@ -163,15 +162,12 @@ def get_empl_projects(f_name, l_name):
 ####
 # END - SELECT STATEMENTS
 ####
-
 #----------------------------------------------
-
-# sp_delete_project
-
 ####
 # START - DELETE STATEMENTS
 ####
 
+# Delete a project from projects
 def delete_project(proj_client, proj_name):
 
     cn = get_db_connection()
