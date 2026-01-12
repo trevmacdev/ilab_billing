@@ -3,7 +3,7 @@ import gradio as gr
 
 class EmployeesManager:
     """
-    Encapsulates employee management UI and actions (Admin/User).
+    Encapsulates employee management UI and actions (Admin/Employees).
     Currently provides simple placeholders for CRUD; wire to DB when ready.
     """
 
@@ -17,19 +17,30 @@ class EmployeesManager:
         return gr.update(visible=True)
 
     def build_admin_tab(self, parent):
-        from db_helper import get_employees, get_empl_projects
+        from db_helper import get_employee_names
 
         with parent:
             with gr.Tab("Manage Employees"):
-                empl = get_employees()
-
+                empl = get_employee_names()
+                
                 gr.Markdown("### Manage Employees (Admin)")
-                dd_client_proj_empl = gr.Dropdown(
-                    label='Client - Project - Employee',
-                    choices=empl_proj if empl_proj else None,
-                    value=empl_proj[0] if (empl_proj and isinstance(empl_proj[0], str)) else None,
-                    filterable=True
-                )
+
+                with gr.Row():  # Employee and project selection.
+
+                    dd_empl = gr.Dropdown(  # Select employee name
+                        label = 'Employee Name',
+                        choices = empl,
+                        value = None,
+                        filterable=True
+                    )
+
+                    dd_proj = gr.Dropdown(      # Select project
+                        # Populate on dd_empl.change.
+                        label='Client - Project - Employee',
+                        choices = None,
+                        value =  None,
+                        filterable=True
+                    )
                 
                 gr.Markdown('The client, project and employee information is treated as one entity.')
                 gr.Markdown('The project must exist before the employee can be created (see Manage Projects tab).')
