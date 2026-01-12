@@ -3,7 +3,7 @@ import gradio as gr
 
 class ProjectsManager:
     """
-    Encapsulates all project CRUD functions and UI (Admin/User).
+    Encapsulates all project CRUD functions and UI (Admin/Projects).
     """
 
     # --- Event Handler Functions (Admin) ---
