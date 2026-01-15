@@ -80,7 +80,7 @@ def employees_insert(
     emp_role
 ):
     cn = get_db_connection()
-    cr cn.cursor()
+    cr = cn.cursor()
 
     cr.callproc(
         'sp_create_employee_insert',
