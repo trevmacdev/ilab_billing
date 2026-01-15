@@ -128,17 +128,17 @@ def get_employee_names():
 
     cr.callproc('sp_get_employees_dist')
 
-    choices = []
+    e = []  # list of employees in name | surname format.
     for result in cr.stored_results():
         for row in result.fetchall():
             f_name, l_name = row[0], row[1]
-            display = f'{f_name} | {l_name}'
-            choices.append(display)
+            e = f'{f_name} | {l_name}'
+            e.append(e)
 
     cr.close()
     cn.close()
 
-    return choices
+    return e # list of employees in name | surname format.
 
 # return employee projects from employees
 def get_empl_projects(f_name, l_name):
