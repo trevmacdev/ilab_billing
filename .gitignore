@@ -7,7 +7,7 @@ src/.gradio/
 src/tsheets/
 billing_app/__pycache__
 billing_app/scratch/
-config.properties
+billing_app/config.properties
 sandbox.py
 timesheet.ipynb
 quick_test.py
