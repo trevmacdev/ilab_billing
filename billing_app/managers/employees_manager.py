@@ -1,54 +1,73 @@
-import gradio as gr
 
+import gradio as gr
 
 class EmployeesManager:
     """
     Encapsulates employee management UI and actions (Admin/Employees).
-    Simple CRUD wiring; assumes db_helper functions commit changes.
+    Simple CRUD wiring; uses mapping states to avoid string splitting.
     """
 
-    # ========== Event Handlers ==========
-
-    def e_change_dd_empl(self, value):
+    # ---------- Helpers ----------
+    @staticmethod
+    def _build_emp_index(items):
         """
-        When employee changes, store the selected employee in State.
-        Expects 'value' in 'First | Last' format.
+        items: [{'first':..., 'last':...}, ...]
+        return:
+          labels: ["First Last", ...]
+          index:  { "First Last": {"first":..., "last":...}, ... }
+        """
+        labels, index = [], {}
+        for it in (items or []):
+            first = (it.get('first') or '').strip()
+            last = (it.get('last') or '').strip()
+            label = f"{first} {last}".strip()
+            labels.append(label)
+            index[label] = {"first": first, "last": last}
+        return labels, index
+
+    @staticmethod
+    def _build_proj_index(items):
+        """
+        items: [{'client':..., 'project':...}, ...]
+        return:
+          labels: ["Client - Project", ...]
+          index:  { "Client - Project": {"client":..., "project":...}, ... }
+        """
+        labels, index = [], {}
+        for it in (items or []):
+            client = (it.get('client') or '').strip()
+            proj = (it.get('project') or '').strip()
+            label = f"{client} - {proj}".strip()
+            labels.append(label)
+            index[label] = {"client": client, "project": proj}
+        return labels, index
+
+    # ========== Event Handlers ==========
+    def e_change_dd_empl(self, value, emp_index):
+        """
+        Resolve the selected employee from the mapping.
         Returns a dict for e_state: {'fname': first, 'lname': last}
         """
-        if not value or "|" not in value:
-            return {'fname': None, 'lname': None, 'client': None, 'proj': None}
-
-        first, last = [s.strip() for s in value.split("|", 1)]
-        return {'fname': first, 'lname': last, 'client': None, 'proj': None}
+        sel = (emp_index or {}).get(value or "", {})
+        return {'fname': sel.get('first'), 'lname': sel.get('last'), 'client': None, 'proj': None}
 
     def dd_proj_update(self, state):
         """
         Update the project dropdown based on the selected employee in State.
-        State format: {'fname': ..., 'lname': ...}
-        Returns a single gr.update(...) for the dd_proj component.
+        Returns two outputs:
+          1) gr.update(...) for dd_proj
+          2) the proj_index mapping state
         """
         from db_helper import get_empl_projects
-
         first = (state or {}).get('fname')
         last = (state or {}).get('lname')
 
         if not first or not last:
-            return gr.update(choices=[], value=None)
+            return gr.update(choices=[], value=None), {}
 
-        # get_empl_projects should return list of strings like: "First | Last | Client | Project"
-        rows = get_empl_projects(first, last) or []
-
-        proj_choices = []
-        for r in rows:
-            parts = [p.strip() for p in r.split("|")]
-            # parts: [First, Last, Client, Project]
-            if len(parts) >= 4:
-                proj_choices.append(f"{parts[2]} | {parts[3]}")
-
-        return gr.update(
-            choices=proj_choices,
-            value=(proj_choices[0] if proj_choices else None)
-        )
+        rows = get_empl_projects(first, last) or []  # list of dicts
+        labels, index = self._build_proj_index(rows)
+        return gr.update(choices=labels, value=(labels[0] if labels else None)), index
 
     def e_create_btn(self):
         return gr.update(visible=True)
@@ -59,85 +78,92 @@ class EmployeesManager:
     def e_delete_btn(self):
         return gr.update(visible=True)
 
-    def click_btn_ok(self, first, last, client, proj, rate, role):
+    def click_btn_ok(self, first, last, client, proj, rate, role, emp_index_state):
         """
-        Create (insert) an employee record, then refresh the employee dropdown and hide the panel.
+        Create (insert) an employee record, then refresh the employee dropdown,
+        return updated mapping, and hide the create panel.
         """
         from db_helper import employees_insert, get_employee_names
-
         employees_insert(first, last, client, proj, rate, role)
 
-        # Refresh dropdown choices
-        choices = get_employee_names() or []
-        selected_val = f"{first} | {last}"
-        new_val = selected_val if selected_val in choices else (choices[0] if choices else None)
+        # Refresh dropdown choices + mapping
+        data = get_employee_names() or []
+        labels, index = self._build_emp_index(data)
+        selected_val = f"{first} {last}".strip()
+        new_val = selected_val if selected_val in labels else (labels[0] if labels else None)
 
-        # Hide panel + update employee dropdown + clear the create fields
         return (
-            gr.update(visible=False),  # pnl_e_create
-            gr.update(choices=choices, value=new_val),  # dd_empl
+            gr.update(visible=False),               # pnl_e_create
+            gr.update(choices=labels, value=new_val),  # dd_empl
             gr.update(value=""), gr.update(value=""),  # tb_c_first, tb_c_last
             gr.update(value=""), gr.update(value=""),  # tb_c_client, tb_c_proj
             gr.update(value=""), gr.update(value=""),  # tb_c_rate, tb_c_role
+            index  # emp_index_state
         )
 
-    def click_btn_update(self, first, last, client, proj, rate, role):
+    def click_btn_update(self, first, last, client, proj, rate, role, emp_index_state):
         """
-        Update employee record, then refresh employee dropdown and hide update panel.
+        Update employee record, then refresh employee dropdown and mapping.
         """
         from db_helper import employees_update, get_employee_names
-
         employees_update(first, last, client, proj, rate, role)
-        choices = get_employee_names() or []
-        selected_val = f"{first} | {last}"
-        new_val = selected_val if selected_val in choices else (choices[0] if choices else None)
+
+        data = get_employee_names() or []
+        labels, index = self._build_emp_index(data)
+        selected_val = f"{first} {last}".strip()
+        new_val = selected_val if selected_val in labels else (labels[0] if labels else None)
 
         return (
-            gr.update(visible=False),  # pnl_e_update
-            gr.update(choices=choices, value=new_val)  # dd_empl
+            gr.update(visible=False),               # pnl_e_update
+            gr.update(choices=labels, value=new_val),  # dd_empl
+            index
         )
 
-    def click_btn_delete(self, first, last):
+    def click_btn_delete(self, first, last, emp_index_state):
         """
-        Delete employee, then refresh dropdown and hide delete panel.
+        Delete employee, then refresh dropdown and mapping.
         """
         from db_helper import employees_delete, get_employee_names
-
         employees_delete(first, last)
-        choices = get_employee_names() or []
-        new_val = choices[0] if choices else None
+
+        data = get_employee_names() or []
+        labels, index = self._build_emp_index(data)
+        new_val = labels[0] if labels else None
 
         return (
-            gr.update(visible=False),  # pnl_e_delete
-            gr.update(choices=choices, value=new_val)  # dd_empl
+            gr.update(visible=False),               # pnl_e_delete
+            gr.update(choices=labels, value=new_val),  # dd_empl
+            index
         )
 
     # ========== UI Builders ==========
-
     def build_admin_tab(self, parent):
         from db_helper import get_employee_names
 
-        # State keeps currently selected employee & aux fields
-        e_state = gr.State({'fname': None, 'lname': None, 'client': None, 'proj': None})
-
-        c = get_employee_names() or []
-        default_emp_value = c[0] if c else None
+        # Initial employee choices + mapping
+        data = get_employee_names() or []  # list of dicts
+        labels, e_index = self._build_emp_index(data)
+        default_emp_value = labels[0] if labels else None
 
         with parent:
             with gr.Tab("Manage Employees"):
                 gr.Markdown("### Manage Employees (Admin)")
 
+                # Mapping states
+                e_state = gr.State({'fname': None, 'lname': None, 'client': None, 'proj': None})
+                emp_index_state = gr.State(e_index)
+                proj_index_state = gr.State({})
+
                 # --- Employee and project selection
                 with gr.Row():
                     dd_empl = gr.Dropdown(
                         label="Employee Name",
-                        choices=c,
+                        choices=labels,
                         value=default_emp_value,
                         filterable=True
                     )
-
                     dd_proj = gr.Dropdown(
-                        label="Client | Project",
+                        label="Client - Project",
                         choices=[],
                         value=None,
                         filterable=True
@@ -193,15 +219,15 @@ class EmployeesManager:
 
                 # --- Wiring events
 
-                # When employee changes: update state, then refresh project dropdown
+                # When employee changes: update state, then refresh project dropdown (and its mapping)
                 dd_empl.change(
                     fn=self.e_change_dd_empl,
-                    inputs=[dd_empl],
+                    inputs=[dd_empl, emp_index_state],
                     outputs=[e_state]
                 ).then(
                     fn=self.dd_proj_update,
                     inputs=[e_state],
-                    outputs=[dd_proj]
+                    outputs=[dd_proj, proj_index_state]
                 )
 
                 # Show panels
@@ -210,52 +236,48 @@ class EmployeesManager:
                 btn_e_delete_empl.click(fn=self.e_delete_btn, inputs=[], outputs=[pnl_e_delete])
 
                 # --- Create Employee flow
-                # 1) Insert -> hide panel and update dd_empl
-                # 2) Then set state from new dd_empl
-                # 3) Then refresh dd_proj based on the (new) selected employee
                 btn_ok.click(
                     fn=self.click_btn_ok,
-                    inputs=[tb_c_first, tb_c_last, tb_c_client, tb_c_proj, tb_c_rate, tb_c_role],
-                    outputs=[pnl_e_create, dd_empl, tb_c_first, tb_c_last, tb_c_client, tb_c_proj, tb_c_rate,
-                             tb_c_role],
+                    inputs=[tb_c_first, tb_c_last, tb_c_client, tb_c_proj, tb_c_rate, tb_c_role, emp_index_state],
+                    outputs=[pnl_e_create, dd_empl, tb_c_first, tb_c_last, tb_c_client, tb_c_proj, tb_c_rate, tb_c_role, emp_index_state],
                 ).then(
                     fn=self.e_change_dd_empl,
-                    inputs=[dd_empl],
+                    inputs=[dd_empl, emp_index_state],
                     outputs=[e_state],
                 ).then(
                     fn=self.dd_proj_update,
                     inputs=[e_state],
-                    outputs=[dd_proj],
+                    outputs=[dd_proj, proj_index_state],
                 )
 
                 # --- Update flow
                 btn_u_ok.click(
                     fn=self.click_btn_update,
-                    inputs=[tb_u_first, tb_u_last, tb_u_client, tb_u_proj, tb_u_rate, tb_u_role],
-                    outputs=[pnl_e_update, dd_empl],
+                    inputs=[tb_u_first, tb_u_last, tb_u_client, tb_u_proj, tb_u_rate, tb_u_role, emp_index_state],
+                    outputs=[pnl_e_update, dd_empl, emp_index_state],
                 ).then(
                     fn=self.e_change_dd_empl,
-                    inputs=[dd_empl],
+                    inputs=[dd_empl, emp_index_state],
                     outputs=[e_state],
                 ).then(
                     fn=self.dd_proj_update,
                     inputs=[e_state],
-                    outputs=[dd_proj],
+                    outputs=[dd_proj, proj_index_state],
                 )
 
                 # --- Delete flow
                 btn_delete.click(
                     fn=self.click_btn_delete,
-                    inputs=[tb_d_first, tb_d_last],
-                    outputs=[pnl_e_delete, dd_empl],
+                    inputs=[tb_d_first, tb_d_last, emp_index_state],
+                    outputs=[pnl_e_delete, dd_empl, emp_index_state],
                 ).then(
                     fn=self.e_change_dd_empl,
-                    inputs=[dd_empl],
+                    inputs=[dd_empl, emp_index_state],
                     outputs=[e_state],
                 ).then(
                     fn=self.dd_proj_update,
                     inputs=[e_state],
-                    outputs=[dd_proj],
+                    outputs=[dd_proj, proj_index_state],
                 )
 
     def build_user_tab(self, parent):
