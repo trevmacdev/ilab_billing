@@ -1,32 +1,23 @@
+
 from metadata import get_mysql_config
 import mysql.connector
-import json
 
 # Establish a db connection
 def get_db_connection():
-
     details = get_mysql_config()
-
-    try:
-        cn = mysql.connector.connect(
-            host = details['host'],
-            user = details['user'],
-            password = details['password'],
-            database = details['database'],
-            port = details['port'],
-            autocommit = True
-        )
-
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-
+    cn = mysql.connector.connect(
+        host=details['host'],
+        user=details['user'],
+        password=details['password'],
+        database=details['database'],
+        port=details['port'],
+        autocommit=True
+    )
     return cn
 
-####
-# START - INSERT STATEMENTS
-####
-
-# The project table contains a list of projects per client and purchase order. Billing is generally caried out per purchase order
+# ======================
+# INSERT / UPDATE / DELETE
+# ======================
 
 # Add a new project
 def projects_insert(
@@ -43,30 +34,28 @@ def projects_insert(
     rate,
     po_start_date,
     po_end_date
-    ):
+):
     cn = get_db_connection()
-
     try:
         cur = cn.cursor()
-        
-        # Call stored proc
-        cur.callproc('sp_create_project_insert',[
-            proj_client,
-            proj_name,
-            po_num,
-            client_manager,
-            ilab_manager,
-            job_code,
-            manager_sig,
-            employee_sig,
-            notes,
-            weekend,
-            rate,
-            po_start_date,
-            po_end_date
+        cur.callproc(
+            'sp_create_project_insert',
+            [
+                proj_client,
+                proj_name,
+                po_num,
+                client_manager,
+                ilab_manager,
+                job_code,
+                manager_sig,
+                employee_sig,
+                notes,
+                weekend,
+                rate,
+                po_start_date,
+                po_end_date
             ]
         )
-        
     finally:
         cur.close()
         cn.close()
@@ -80,135 +69,127 @@ def employees_insert(
     emp_role
 ):
     cn = get_db_connection()
-    cr = cn.cursor()
+    try:
+        cr = cn.cursor()
+        cr.callproc(
+            'sp_create_employee_insert',
+            [f_name, l_name, proj_client, proj_name, rate, emp_role]
+        )
+    finally:
+        cr.close()
+        cn.close()
 
-    cr.callproc(
-        'sp_create_employee_insert',
-        [f_name, l_name, proj_client, proj_name, rate,emp_role]
-    )
+def employees_update(
+    f_name,
+    l_name,
+    proj_client,
+    proj_name,
+    rate,
+    emp_role
+):
+    cn = get_db_connection()
+    try:
+        cr = cn.cursor()
+        # Assumes stored procedure exists with this signature
+        cr.callproc(
+            'sp_update_employee',
+            [f_name, l_name, proj_client, proj_name, rate, emp_role]
+        )
+    finally:
+        cr.close()
+        cn.close()
 
-    cr.close
-    cn.close
+def employees_delete(f_name, l_name):
+    cn = get_db_connection()
+    try:
+        cr = cn.cursor()
+        # Assumes stored procedure exists with this signature
+        cr.callproc('sp_delete_employee', [f_name, l_name])
+    finally:
+        cr.close()
+        cn.close()
 
-    return
+def delete_project(proj_client, proj_name):
+    cn = get_db_connection()
+    try:
+        cr = cn.cursor()
+        cr.callproc('sp_delete_project', [proj_client, proj_name])
+    finally:
+        cr.close()
+        cn.close()
 
-####
-# END - INSERT STATEMENTS
-####
-#----------------------------------------------
-####
-# START - SELECT STATEMENTS
-####
+# ======================
+# SELECTS (structured results)
+# ======================
 
-# Return proj_client and proj_name from projects
+# Return [{'proj_client': ..., 'proj_name': ...}, ...]
 def get_client_and_proj():
-    
     cn = get_db_connection()
+    try:
+        cr = cn.cursor()
+        cr.callproc("sp_get_projects_clients")
+        out = []
+        for result in cr.stored_results():
+            for row in result.fetchall():
+                proj_client, proj_name = row[0], row[1]
+                out.append({
+                    "proj_client": (proj_client or "").strip(),
+                    "proj_name": (proj_name or "").strip()
+                })
+        return out
+    finally:
+        cr.close()
+        cn.close()
 
-    cr = cn.cursor()
-    cr.callproc("sp_get_projects_clients")
-
-    choices = []
-    for result in cr.stored_results():
-        for row in result.fetchall():
-            proj_client, proj_name = row[0], row[1]
-            display = f'{proj_client} - {proj_name}'
-            choices.append(display)
-    
-    cr.close()
-    cn.close()
-
-    print(f'Output of get_client_and_proj: {choices}')
-    
-    return choices
-
-# Return app project information from projects
+# Return a single dict of project info (column names -> values)
 def get_project_info(proj_client, proj_name):
-
     cn = get_db_connection()
+    try:
+        cr = cn.cursor(dictionary=True)
+        cr.callproc('sp_get_project_details', [proj_client, proj_name])
+        result_row = None
+        for result in cr.stored_results():
+            rows = result.fetchall()
+            if rows:
+                result_row = rows[0]
+                break
+        return result_row
+    finally:
+        cr.close()
+        cn.close()
 
-    cr = cn.cursor(dictionary=True)
-    cr.callproc('sp_get_project_details', [proj_client, proj_name])
-
-    project_info = None
-    for result in cr.stored_results():
-        rows = result.fetchall()     # We only expect one record
-        if rows:
-            result_row = rows[0]
-        break
-
-    
-    cr.close()
-    cn.close()
-
-    return result_row
-
-# Return employee names from employees
+# Return [{'first': ..., 'last': ...}, ...]
 def get_employee_names():
-    
     cn = get_db_connection()
-    cr = cn.cursor()
+    try:
+        cr = cn.cursor()
+        cr.callproc('sp_get_employees_dist')
+        out = []
+        for result in cr.stored_results():
+            for row in result.fetchall():
+                first = (row[0] or '').strip()
+                last = (row[1] or '').strip()
+                out.append({"first": first, "last": last})
+        return out
+    finally:
+        cr.close()
+        cn.close()
 
-    names = []  # list of employees in name | surname format.
-
-    cr.callproc('sp_get_employees_dist')
-
-    for result in cr.stored_results():
-        rows = result.fetchall()
-        for row in rows:
-            first = (row[0] or '').strip()
-            last = (row[1] or '').strip()
-
-            names.append(f"{first} | {last}")
-
-    print (f'Output of get_employee_names: {names}')
-
-    cr.close()
-    cn.close()
-
-    return names # list of employees in name | surname format.
-
-# return employee projects from employees
+# Return [{'client': ..., 'project': ...}, ...] for a given employee
 def get_empl_projects(f_name, l_name):
     cn = get_db_connection()
-    cr = cn.cursor()
-
-    cr.callproc('sp_get_empl_projects', [f_name, l_name])
-
-    choices = []
-    for result in cr.stored_results():
-        for row in result.fetchall():
-            client, proj = row[0], row[1]
-            display = f'{f_name} | {l_name} | {client} | {proj}'
-            choices.append(display)
-
-    print(f'Output of get_empl_projects: {choices}')
-
-    cr.close()
-    cn.close()
-
-    return choices
-
-####
-# END - SELECT STATEMENTS
-####
-#----------------------------------------------
-####
-# START - DELETE STATEMENTS
-####
-
-# Delete a project from projects
-def delete_project(proj_client, proj_name):
-
-    cn = get_db_connection()
-    cr = cn.cursor()
-
-    cr.callproc('sp_delete_project', [proj_client, proj_name])
-
-    cr.close()
-    cn.close()
-    return
-
-####
-# END - DELETE STATEMENTS
-####
+    try:
+        cr = cn.cursor()
+        cr.callproc('sp_get_empl_projects', [f_name, l_name])
+        out = []
+        for result in cr.stored_results():
+            for row in result.fetchall():
+                client, proj = row[0], row[1]
+                out.append({
+                    "client": (client or '').strip(),
+                    "project": (proj or '').strip()
+                })
+        return out
+    finally:
+        cr.close()
+        cn.close()
