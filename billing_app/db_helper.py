@@ -71,6 +71,27 @@ def projects_insert(
         cur.close()
         cn.close()
 
+def employees_insert(
+    f_name,
+    l_name,
+    proj_client,
+    proj_name,
+    rate,
+    emp_role
+):
+    cn = get_db_connection()
+    cr cn.cursor()
+
+    cr.callproc(
+        'sp_create_employee_insert',
+        [f_name, l_name, proj_client, proj_name, rate,emp_role]
+    )
+
+    cr.close
+    cn.close
+
+    return
+
 ####
 # END - INSERT STATEMENTS
 ####
