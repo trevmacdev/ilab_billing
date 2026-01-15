@@ -53,31 +53,41 @@ class EmployeesManager:
                 with gr.Row(visible=False) as pnl_e_create:
                     with gr.Column():
                         gr.Markdown("Create Employee")
-                        tb_e_first = gr.Textbox(label="First Name")
-                        tb_e_last = gr.Textbox(label="Last Name")
-                        tb_e_client = gr.Textbox(label="Client")
-                        tb_e_proj = gr.Textbox(label="Project")
-                        btn_e_create_ok = gr.Button("OK")
+                        with gr.Row():
+                            tb_c_first = gr.Textbox(label="First Name")
+                            tb_c_last = gr.Textbox(label="Last Name")
+                        with gr.Row():
+                            tb_c_client = gr.Textbox(label="Client")
+                            tb_c_proj = gr.Textbox(label="Project")
+                        with gr.Row():
+                            tb_c_rate = gr.Textbox(label="Rate")
+                            tb_c_row = gr.Textbox(label="Row")
+                        btn__ok = gr.Button("OK")
 
                 with gr.Row(visible=False) as pnl_e_update:
                     with gr.Column():
                         gr.Markdown("Update Employee (placeholder)")
-                        tb_eu_first = gr.Textbox(label="First Name")
-                        tb_eu_last = gr.Textbox(label="Last Name")
-                        tb_eu_client = gr.Textbox(label="Client")
-                        tb_eu_proj = gr.Textbox(label="Project")
-                        btn_e_update_ok = gr.Button("Save")
+                        with gr.Row():
+                            tb_u_first = gr.Textbox(label="First Name")
+                            tb_u_last = gr.Textbox(label="Last Name")
+                        with gr.Row():
+                            tb_u_client = gr.Textbox(label="Client")
+                            tb_u_proj = gr.Textbox(label="Project")
+                        with gr.Row():
+                            tb_u_rate = gr.Textbox(label="Rate")
+                            tb_u_row = gr.Textbox(label="Row")
+                        btn_save = gr.Button("Save")
 
                 with gr.Row(visible=False) as pnl_e_delete:
                     with gr.Column():
                         gr.Markdown("Delete Employee (placeholder)")
-                        btn_e_delete_ok = gr.Button("Confirm Delete")
+                        btn_delete = gr.Button("Confirm Delete")
 
                 btn_e_create_empl.click(fn=self.e_create_btn, inputs=[], outputs=[pnl_e_create])
                 btn_e_update_empl.click(fn=self.e_update_btn, inputs=[], outputs=[pnl_e_update])
                 btn_e_delete_empl.click(fn=self.e_delete_btn, inputs=[], outputs=[pnl_e_delete])
 
-                # TODO: Wire btn_e_create_ok / btn_e_update_ok / btn_e_delete_ok to db_helper
+                # TODO: Wire btn_ok / btn_save / btn_delete
 
     def build_user_tab(self, parent):
         with parent:
