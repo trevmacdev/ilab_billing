@@ -117,6 +117,8 @@ def get_client_and_proj():
     
     cr.close()
     cn.close()
+
+    print(f'Output of get_client_and_proj: {choices}')
     
     return choices
 
@@ -147,19 +149,24 @@ def get_employee_names():
     cn = get_db_connection()
     cr = cn.cursor()
 
+    names = []  # list of employees in name | surname format.
+
     cr.callproc('sp_get_employees_dist')
 
-    e = []  # list of employees in name | surname format.
     for result in cr.stored_results():
-        for row in result.fetchall():
-            f_name, l_name = row[0], row[1]
-            e = f'{f_name} | {l_name}'
-            e.append(e)
+        rows = result.fetchall()
+        for row in rows:
+            first = (row[0] or '').strip()
+            last = (row[1] or '').strip()
+
+            names.append(f"{first} | {last}")
+
+    print (f'Output of get_employee_names: {names}')
 
     cr.close()
     cn.close()
 
-    return e # list of employees in name | surname format.
+    return names # list of employees in name | surname format.
 
 # return employee projects from employees
 def get_empl_projects(f_name, l_name):
@@ -174,6 +181,8 @@ def get_empl_projects(f_name, l_name):
             client, proj = row[0], row[1]
             display = f'{f_name} | {l_name} | {client} | {proj}'
             choices.append(display)
+
+    print(f'Output of get_empl_projects: {choices}')
 
     cr.close()
     cn.close()
