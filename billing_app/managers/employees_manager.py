@@ -279,7 +279,7 @@ class EmployeesManager:
                     inputs=[e_state],
                     outputs=[dd_proj, proj_index_state],
                 )
-
+'''
     def build_user_tab(self, parent):
         with parent:
             with gr.Tab("Manage Employees"):
@@ -296,3 +296,4 @@ class EmployeesManager:
                     inputs=[emp_name, emp_role],
                     outputs=[emp_out],
                 )
+'''
