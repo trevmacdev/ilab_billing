@@ -6,10 +6,12 @@ from metadata import get_gradio_config
 from auth.login import build_login
 from managers.projects_manager import ProjectsManager
 from managers.employees_manager import EmployeesManager
+from users.ts_tabs import TimesheetTabs
 
 def build_app():
     proj_mgr = ProjectsManager()
     emp_mgr = EmployeesManager()
+    ts_tabs = TimesheetTabs()
 
     with gr.Blocks(title="Billing App") as billing_app:
         # STATE VARIABLES
@@ -25,18 +27,17 @@ def build_app():
         # Panels
         pnl_login = gr.Column(visible=True)       # Login panel
         pnl_admin = gr.Tabs(visible=False)        # Admin panel
-        pnl_user = gr.Tabs(visible=False)         # User panel
+        pnl_ts_tabs = gr.Tabs(visible=False)         # User panel
 
         # Build panels
-        build_login(pnl_login, pnl_admin, pnl_user, ROLE)
+        build_login(pnl_login, pnl_admin, pnl_ts_tabs, ROLE)
 
         # Admin tabs (split across classes)
         proj_mgr.build_admin_tab(pnl_admin, PROJ_CLIENT, PROJ_NAME)
         emp_mgr.build_admin_tab(pnl_admin)
 
-        # User tabs
-        proj_mgr.build_user_tab(pnl_user)
-        emp_mgr.build_user_tab(pnl_user)
+        # Timesheet tabs
+        ts_tabs.build_ts_tab(pnl_ts_tabs)
 
     return billing_app
 
