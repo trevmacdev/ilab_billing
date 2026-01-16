@@ -1,14 +1,23 @@
 import gradio as gr
+import pandas as pd
+from billing_app.formatter.ts_build import TSFormatter
 
 class TimesheetTabs:
 
-    # ========== Event Handlers ==========
+    tsf = TSFormatter() # Format timesheet dataframes.
+
+    # ========== Event Functions ==========
 
     # ========== UI Builders ==========
     def build_ts_tab(self, parent):
-
         with parent:
+            gr.Markdown('### Upload your full Tsheet csv file. Make sure the dates on the file match your billing dates.')
             with gr.Tab('Timesheets'):
+
+                # Declare state variables
+                cur_df = gr.State(pd.DataFrame())   # Dataframe assigned to ts_view (gr.DataFrame)
+                tsheets_df = gr.State(pd.DataFrame())   # list of dataframes for each tsheet.
+
                 with gr.Row():
                     with gr.Column(scale=1, min_width=220): # left column contains file upload, buttons and tsheet selection radio buttons
                         file = gr.File(
@@ -32,3 +41,5 @@ class TimesheetTabs:
                     with gr.Column(scale=5):
                         ts_view = gr.DataFrame(wrap=True)
 
+
+    # ========== Event Handlers ==========

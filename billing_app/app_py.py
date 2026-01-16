@@ -6,7 +6,7 @@ from metadata import get_gradio_config
 from auth.login import build_login
 from managers.projects_manager import ProjectsManager
 from managers.employees_manager import EmployeesManager
-from users.ts_tabs import TimesheetTabs
+from billing.ts_tabs import TimesheetTabs
 
 def build_app():
     proj_mgr = ProjectsManager()
