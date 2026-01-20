@@ -60,6 +60,10 @@ def get_gradio_config():
 # END -- GET WEB SERVER CONFIG
 ###########
 
+###########
+# START -- GET DB INFO
+###########
+
 def get_mysql_config():
 
     DB_HOST = config.get('database', 'host')
@@ -79,13 +83,45 @@ def get_mysql_config():
     return cn
 
 ###########
+# END -- GET DB INFO
+###########
+
+###########
 # START -- GET DB INFO
 ###########
+
+def get_pub_hollidays():
+
+    # Get the stored holiday list as a comma separated string
+    h = config.get('global', 'public_holidays')
+    h = [d.strip() for d in h.split(',')]
+
+    # Determine last year
+    last_year = date.today().year - 1
+
+    # Extract the year of the first holiday (yyyy-mm-dd)
+    first_year = int(h[0][:4])
+
+    # If the list does NOT start with last year's holiday, regenerate it
+    if first_year != last_year:
+        print('Updating public holiday dates in config.properties')
+        from pub_holidays import pub_hol
+
+        # Get fresh list for last year, this year, next year
+        h = pub_hol(date.today().year)
+
+        # Save the updated list back to config
+        config.set('global', 'public_holidays', ', '.join(h))
+
+        with open("config.properties", 'w') as configfile:
+            config.write(configfile)
+
+    return h
+
+
 
 
 ###########
 # END -- GET DB INFO
 ###########
-
-
 
