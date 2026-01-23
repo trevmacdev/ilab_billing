@@ -27,16 +27,29 @@ def rename_cols(df):
         'lname': 'Last Name',
         'local_date': 'Date',
         'local_day': 'Day',
-        'hours': 'Hours',
+        'hours': 'Normal Hrs',
         'jobcode_3': 'Job Code',
         'notes': 'Notes'
     })
 
 # Update the timesheet dataframe with overtime
 def ot_calc(df, id):
+    import ast # convert strings to dicts
+
     # Step 1: Retrieve overtime rates from the projects table.
-    ot_rates = get_ot_rate(id)
+    ot_rates = ast.literal_eval(get_ot_rate(id))
     print(f'ot_rates: {ot_rates}')
+
+    # Get unique overtime values to create additonal df columns
+    unique_rates = sorted(set(ot_rates.values()))
+    print(f'Unique overtime rates: {unique_rates}')
+
+    col_indx = df.columns.get_loc('Normal Hrs') + 1 # Set the column index for the first OT rate column.
+
+    for i, v in enumerate(unique_rates):
+        df.insert(col_indx + i, f'{v} x Hrs', 0)
+
+    print(f'Overtime Hours inserted into df {df}')
 
     return df
 
