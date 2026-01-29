@@ -264,3 +264,7 @@ def get_ot_rate(id):
     """
     row = get_one_row('sp_get_proj_ot_rate', [id])
     return first_value(row)
+
+def get_weekend(id):
+    row = get_one_row('sp_get_proj_weekend', [id])
+    return first_value(row)
