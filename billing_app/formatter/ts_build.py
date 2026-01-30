@@ -45,11 +45,11 @@ def ot_calc(df: pd.DataFrame, proj_id: int) -> pd.DataFrame:
 
     # Step 1: Retrieve overtime rates from the projects table.
     ot_rates = ast.literal_eval(get_ot_rate(proj_id))
-    print(f'ot_rates: {ot_rates}')
+    #print(f'ot_rates: {ot_rates}')
 
     # Get unique overtime values to create additional df columns
     unique_rates = sorted(set(ot_rates.values()))
-    print(f'Unique overtime rates: {unique_rates}')
+    #print(f'Unique overtime rates: {unique_rates}')
 
     insert_at = df.columns.get_loc('Normal Hrs') + 1  # index after Normal Hrs
 
@@ -62,15 +62,15 @@ def ot_calc(df: pd.DataFrame, proj_id: int) -> pd.DataFrame:
         df.insert(insert_at + i, col_name, 0)
         rate_cols[str(v)] = col_name
 
-    print(f'rate_cols: {rate_cols}')
+    #print(f'rate_cols: {rate_cols}')
 
     # Load weekend/public holiday values
     weekend = get_weekend(proj_id)
     we = [d.strip() for d in weekend.split(',') if d.strip()]
-    print(f'we: {we}')
+    #print(f'we: {we}')
 
     ph = get_pub_hollidays()
-    print(f'public holidays: {ph}')
+    #print(f'public holidays: {ph}')
 
 
     # Loop through each row in df.
@@ -100,7 +100,7 @@ def ot_calc(df: pd.DataFrame, proj_id: int) -> pd.DataFrame:
             df.at[index, 'Normal Hrs'] = 8
             df.at[index, ot_col] = normal_hours - 8
 
-    print(f'Overtime Hours inserted into df:\n{df}')
+    #print(f'Overtime Hours inserted into df:\n{df}')
     return df
 
 
@@ -117,13 +117,13 @@ class TSFormatter:
     @staticmethod
     def built_cust_df(proj_client: str, proj_name: str, df: pd.DataFrame) -> pd.DataFrame:
         proj_id = get_proj_id(proj_client, proj_name)
-        print(f'proj_id = {proj_id}')
+        #print(f'proj_id = {proj_id}')
 
         jc = get_job_code(proj_id)
-        print(f'jc = {jc}')
+        #print(f'jc = {jc}')
 
         df = df[df['Job Code'] == jc]
-        print(f'df with job code:\n{df}')
+        #print(f'df with job code:\n{df}')
 
         df = ot_calc(df, proj_id)
         return df
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     pd.set_option('display.max_colwidth', None)
 
     df = tsf.process_csv(CSV_PATH)
-    print(f"process_csv Job Code column:\n{df['Job Code']}")
+    #print(f"process_csv Job Code column:\n{df['Job Code']}")
 
     df = tsf.built_cust_df('Telkom', 'Consumer', df)
-    print(f'build_cust_df result:\n{df}')
+    #print(f'build_cust_df result:\n{df}')
