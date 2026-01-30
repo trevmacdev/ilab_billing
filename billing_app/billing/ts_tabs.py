@@ -24,7 +24,8 @@ class TimesheetTabs:
         return (
             df,                                # ts_view
             gr.update(visible=True),           # ts_buttons
-            gr.update(visible=True, choices=choices, value=[]),  # chkbx_timesheet
+            gr.update(visible=True, choices=choices, value=[])  #chkbox_timesheet
+            df,  # working_frame (state variable)
         )
 
     def _extract_timesheet_choices(self, df: pd.DataFrame):
@@ -59,8 +60,9 @@ class TimesheetTabs:
 
             with gr.Tab("Timesheets"):
                 # Declare state variables (keep if you need later)
-                cur_df = gr.State(pd.DataFrame())
-                tsheets_df = gr.State(pd.DataFrame())
+                # cur_df = gr.State(pd.DataFrame())
+                # tsheets_df = gr.State(pd.DataFrame())
+                working_frame = gr.State(pd.Dataframe())
 
                 with gr.Row():
                     with gr.Column(scale=1, min_width=220):
@@ -97,5 +99,11 @@ class TimesheetTabs:
                         ts_view,
                         ts_buttons,
                         chkbx_timesheet,
+                        working_frame,
                     ],
+                )
+
+                btn_t_ok.click(
+                    fn=self.ev_btn_t_ok_click,
+                    inputs=[chkbx_timesheet]
                 )
