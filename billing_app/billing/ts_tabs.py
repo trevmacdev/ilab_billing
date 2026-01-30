@@ -32,12 +32,24 @@ class TimesheetTabs:
         from billing_app.db_helper import get_proj_from_jc
 
         choices = []
-        for jc in df['Job Code'].dropna().unique():
-            for item in get_proj_from_jc(jc):  # may be 0, 1, or many rows
-                choices.append(f"{item['client']} - {item['proj']}")
+
+        # Quick visibility: what are we actually sending to the DB?
+        jcs = df['Job Code'].dropna().unique()
+        print(f"_extract_timesheet_choices - unique job codes: {len(jcs)}")
+        print(f"_extract_timesheet_choices - sample job codes: {list(jcs[:10])}")
+
+        for jc in jcs:
+            # Normalize to plain string for DB lookup
+            jc_clean = str(jc).replace("\xa0", " ").strip()
+
+            rows = get_proj_from_jc(jc_clean)
+            if len(rows) == 0:
+                print(f"NO MATCH for job code: [{jc_clean}]")
+            else:
+                for item in rows:
+                    choices.append(f"{item['client']} - {item['proj']}")
 
         return choices
-
     # ========== UI Builders ==========
     def build_ts_tab(self, parent):
         with parent:
