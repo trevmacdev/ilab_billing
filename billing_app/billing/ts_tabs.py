@@ -2,44 +2,88 @@ import gradio as gr
 import pandas as pd
 from billing_app.formatter.ts_build import TSFormatter
 
-class TimesheetTabs:
 
-    tsf = TSFormatter() # Format timesheet dataframes.
+class TimesheetTabs:
+    def __init__(self):
+        self.tsf = TSFormatter()
 
     # ========== Event Functions ==========
+
+    # Upload a csv file for processing
+    def ev_file_upload(self, path):
+
+        # Load/format the csv (process_csv should return a filepath or something pd.read_csv can read)
+        df = self.tsf.process_csv(path)
+
+        # Build choices for the checkbox immediately
+        choices = self._extract_timesheet_choices(df)
+
+        print(f"ev_file_change - rows: {len(df)}")
+        print(f"ev_file_change - choices: {len(choices)}")
+
+        return (
+            df,                                # ts_view
+            gr.update(visible=True),           # ts_buttons
+            gr.update(visible=True, choices=choices, value=[]),  # chkbx_timesheet
+        )
+
+    def _extract_timesheet_choices(self, df: pd.DataFrame):
+
+        from billing_app.db_helper import get_proj_from_jc
+
+        choices = []
+        for jc in df['Job Code'].dropna().unique():
+            for item in get_proj_from_jc(jc):  # may be 0, 1, or many rows
+                choices.append(f"{item['client']} - {item['proj']}")
+
+        return choices
 
     # ========== UI Builders ==========
     def build_ts_tab(self, parent):
         with parent:
-            gr.Markdown('### Upload your full Tsheet csv file. Make sure the dates on the file match your billing dates.')
-            with gr.Tab('Timesheets'):
+            gr.Markdown(
+                "### Upload your full Tsheet csv file. Make sure the dates on the file match your billing dates."
+            )
 
-                # Declare state variables
-                cur_df = gr.State(pd.DataFrame())   # Dataframe assigned to ts_view (gr.DataFrame)
-                tsheets_df = gr.State(pd.DataFrame())   # list of dataframes for each tsheet.
+            with gr.Tab("Timesheets"):
+                # Declare state variables (keep if you need later)
+                cur_df = gr.State(pd.DataFrame())
+                tsheets_df = gr.State(pd.DataFrame())
 
                 with gr.Row():
-                    with gr.Column(scale=1, min_width=220): # left column contains file upload, buttons and tsheet selection radio buttons
+                    with gr.Column(scale=1, min_width=220):
                         file = gr.File(
-                            file_types=['.csv'],
-                            type='filepath',
-                            label='Upload Raw TSheet (csv)'
+                            file_types=[".csv"],
+                            type="filepath",
+                            label="Upload Raw TSheet (csv)",
                         )
+
                         chkbx_timesheet = gr.CheckboxGroup(
-                            choices=None,    # extract client - project from db if it exists in the job code exists in the tsheet job_code_3
-                            info='Select customers for billing',
-                            type='value',
-                            interactive='True',
-                            visible='False',
-                            container='True'
+                            choices=[],
+                            info="Select customers for billing",
+                            type="value",
+                            interactive=True,
+                            visible=False,
+                            container=True,
                         )
-                        with gr.Group('ts_buttons', visible=False):
-                            btn_t_ok = gr.Button('OK')
+
+                        ts_buttons = gr.Group(visible=False)
+                        with ts_buttons:
+                            btn_t_ok = gr.Button("OK")
                             with gr.Row():
-                                btn_t_back = gr.Button('<-', interactive=False)
-                                btn_t_next = gr.Button('->', interactive=False)
+                                btn_t_back = gr.Button("<-", interactive=False)
+                                btn_t_next = gr.Button("->", interactive=False)
+
                     with gr.Column(scale=5):
                         ts_view = gr.DataFrame(wrap=True)
 
-
-    # ========== Event Handlers ==========
+                # ========== Event Wiring ==========
+                file.upload(
+                    fn=self.ev_file_upload,
+                    inputs=[file],
+                    outputs=[
+                        ts_view,
+                        ts_buttons,
+                        chkbx_timesheet,
+                    ],
+                )
