@@ -268,3 +268,12 @@ def get_ot_rate(id):
 def get_weekend(id):
     row = get_one_row('sp_get_proj_weekend', [id])
     return first_value(row)
+
+def get_proj_from_jc(jc):
+    rows=get_many_rows('sp_get_proj_from_jc', [jc])
+    out = []
+    for r in rows:
+        client = (r.get('proj_client', '') or '').strip()
+        proj = (r.get('proj_name', '') or '').strip()
+        out.append({'client': client, 'proj': proj})
+    return out
